@@ -4,30 +4,53 @@
       [
         "@react-native-tvos/config-tv",
         {
-          "androidTVBanner": "./assets/images/icon-400x240.png",
+          "androidTVBanner": "./assets/images/tv/android-banner.png",
           "appleTVImages": {
-            "icon": "./assets/images/icon-1280x768.png",
-            "iconSmall": "./assets/images/icon-400x240.png",
-            "iconSmall2x": "./assets/images/icon-800x480.png",
-            "topShelf": "./assets/images/icon-1920x720.png",
-            "topShelf2x": "./assets/images/icon-3840x1440.png",
-            "topShelfWide": "./assets/images/icon-2320x720.png",
-            "topShelfWide2x": "./assets/images/icon-4640x1440.png"
+            "icon": "./assets/images/tv/appletv-icon.png",
+            "iconSmall": "./assets/images/tv/appletv-icon-small.png",
+            "iconSmall2x": "./assets/images/tv/appletv-icon-small-2x.png",
+            "topShelf": "./assets/images/tv/appletv-top-shelf.png",
+            "topShelf2x": "./assets/images/tv/appletv-top-shelf-2x.png",
+            "topShelfWide": "./assets/images/tv/appletv-top-shelf-wide.png",
+            "topShelfWide2x": "./assets/images/tv/appletv-top-shelf-wide-2x.png"
           }
         }
-      ]
+      ],
+      "./plugins/withSceneLifecycle",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B1260",
+          "image": "./assets/images/splash-blank.png",
+          "imageWidth": 288,
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-video",
+      "expo-router"
     ],
     "android": {
-      "splash": {
-        "image": "./assets/images/icon-1920x720.png"
-      }
+      "package": "com.jucollet.triviatv",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon-foreground.png",
+        "backgroundImage": "./assets/images/adaptive-icon-background.png",
+        "backgroundColor": "#0047B3"
+      },
+      "versionCode": 3
     },
     "ios": {
-      "splash": {
-        "image": "./assets/images/icon-1920x720.png"
-      }
+      "bundleIdentifier": "com.jucollet.trivia-tv"
     },
-    "name": "trivia-tv",
-    "slug": "trivia-tv"
+    "name": "Chacun Son Truc",
+    "slug": "trivia-tv",
+    "scheme": "chacunsontruc",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "icon": "./assets/images/icon.png"
   }
 }
