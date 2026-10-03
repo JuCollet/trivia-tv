@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
+import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
 import PlayerList from '@/components/PlayerList';
@@ -7,10 +8,12 @@ import QrPlaceholder from '@/components/QrPlaceholder';
 import Screen from '@/components/Screen';
 import { MOCK_PLAYERS, MOCK_ROOM_CODE } from '@/game/mock';
 import { MAX_PLAYERS, MIN_PLAYERS } from '@/game/rules';
+import { useBackgroundMusic } from '@/hooks/useBackgroundMusic';
 import { spacing } from '@/theme';
 
 // TV screen 2: lobby with QR code, room code and arriving players.
 export default function TvLobby() {
+  useBackgroundMusic(MUSIC.lobby, 0.4);
   const players = MOCK_PLAYERS;
   const canStart = players.length >= MIN_PLAYERS && players.some((p) => p.themesReady);
 
@@ -31,6 +34,7 @@ export default function TvLobby() {
           label="Lancer la partie"
           onPress={() => router.replace('/theme')}
           disabled={!canStart}
+          sound="start"
           hasTVPreferredFocus
         />
       </View>

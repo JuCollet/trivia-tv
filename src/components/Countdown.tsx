@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import AppText from './AppText';
+import { playSfx, stopSfx } from '@/audio/sounds';
 import { colors, s } from '@/theme';
 
 type Props = {
   seconds: number;
   onEnd?: () => void;
 };
+
+// The tick-tock sound lasts exactly this long and ends with the timer.
+const TICK_SECONDS = 5;
 
 // Local timer for the prototype. In game, the server is the source of truth.
 export default function Countdown({ seconds, onEnd }: Props) {
@@ -20,6 +24,14 @@ export default function Countdown({ seconds, onEnd }: Props) {
     const timer = setTimeout(() => setRemaining((r) => r - 1), 1000);
     return () => clearTimeout(timer);
   }, [remaining, onEnd]);
+
+  useEffect(() => {
+    if (remaining === TICK_SECONDS && seconds > TICK_SECONDS) void playSfx('tick');
+    if (remaining === 0) void playSfx('time-up');
+  }, [remaining, seconds]);
+
+  // Leaving early (the host reveals the answer) cuts the tick-tock.
+  useEffect(() => () => stopSfx('tick'), []);
 
   return (
     <View style={[styles.circle, remaining <= 5 && styles.urgent]}>

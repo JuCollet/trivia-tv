@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TVFocusGuideView, View } from "react-native";
 import { router } from "expo-router";
 import AppText from "@/components/AppText";
 import FocusableButton from "@/components/FocusableButton";
@@ -17,6 +17,7 @@ const TIMERS = [10, 15, 20, 30] as const;
 // TV screen 1: home and game settings.
 export default function TvHome() {
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
+  const [cta, setCta] = useState<View | null>(null);
   const update = <K extends keyof GameSettings>(
     key: K,
     value: GameSettings[K],
@@ -57,11 +58,17 @@ export default function TvHome() {
         />
       </View>
 
-      <FocusableButton
-        label="Créer la salle"
-        onPress={() => router.push("/lobby")}
-        style={styles.cta}
-      />
+      {/* The button is right-aligned under the options so tvOS can move up
+          from it, and this full-width guide sends focus down to it from any
+          option. */}
+      <TVFocusGuideView autoFocus destinations={cta ? [cta] : []}>
+        <FocusableButton
+          ref={setCta}
+          label="Créer la salle"
+          onPress={() => router.push("/lobby")}
+          style={styles.cta}
+        />
+      </TVFocusGuideView>
     </Screen>
   );
 }
@@ -72,6 +79,6 @@ const styles = StyleSheet.create({
     marginVertical: spacing.md,
   },
   cta: {
-    alignSelf: "flex-start",
+    alignSelf: "flex-end",
   },
 });

@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
 import Screen from '@/components/Screen';
+import { useScreenSfx } from '@/hooks/useScreenSfx';
 import { MOCK_PLAYERS } from '@/game/mock';
 import { colors, radius, s, spacing } from '@/theme';
 
@@ -12,6 +13,8 @@ const PODIUM_HEIGHTS = [s(140), s(100), s(72)];
 // TV screen 7: mystery final question announcement (points ×2), then podium and badges.
 export default function TvFinale() {
   const [step, setStep] = useState<'intro' | 'podium'>('intro');
+  // The finale impact is much louder than the other sounds.
+  useScreenSfx(step === 'intro' ? 'finale-intro' : 'podium', step === 'intro' ? 0.5 : 1);
   const podium = [...MOCK_PLAYERS].sort((a, b) => b.score - a.score).slice(0, 3);
 
   if (step === 'intro') {
@@ -46,7 +49,7 @@ export default function TvFinale() {
         })}
       </View>
       {/* TODO: game badges (awards accumulated per player). */}
-      <FocusableButton label="Nouvelle partie" onPress={() => router.replace('/')} hasTVPreferredFocus />
+      <FocusableButton label="Nouvelle partie" onPress={() => router.replace('/')} sound="start" hasTVPreferredFocus />
     </Screen>
   );
 }

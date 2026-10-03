@@ -4,9 +4,21 @@ import { router } from 'expo-router';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
 import Screen from '@/components/Screen';
+import type { SfxName } from '@/audio/sounds';
 import { MOCK_AWARDS, playerName } from '@/game/mock';
 import { AWARDS, roundAwardsToShow } from '@/game/rules';
+import type { AwardId } from '@/game/types';
+import { useScreenSfx } from '@/hooks/useScreenSfx';
 import { colors, radius, s, spacing } from '@/theme';
+
+const AWARD_SFX: Record<AwardId, SfxName> = {
+  bonTheme: 'bonus',
+  plusViteQueSonOmbre: 'steal',
+  outsider: 'award',
+  seulContreTous: 'award',
+  pasMonTruc: 'fail',
+  bonnetDane: 'fail',
+};
 
 // TV screen 6: carousel of the round's awards, one award at a time.
 export default function TvAwards() {
@@ -14,6 +26,8 @@ export default function TvAwards() {
   const [index, setIndex] = useState(0);
   const award = awards[index];
   const isLast = index >= awards.length - 1;
+  // `index` replays the sound when two awards in a row share it.
+  useScreenSfx(award ? AWARD_SFX[award.id] : null, 1, index);
 
   // TODO: go to /theme while there are rounds left.
   const next = () => (isLast ? router.replace('/finale') : setIndex((i) => i + 1));

@@ -27,7 +27,8 @@
         }
       ],
       "expo-video",
-      "expo-router"
+      "expo-router",
+      "expo-audio"
     ],
     "android": {
       "package": "com.jucollet.triviatv",
