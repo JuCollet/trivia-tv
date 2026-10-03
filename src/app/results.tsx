@@ -7,12 +7,14 @@ import FocusableButton from '@/components/FocusableButton';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlayerList from '@/components/PlayerList';
 import Screen from '@/components/Screen';
+import { useScreenSfx } from '@/hooks/useScreenSfx';
 import { MOCK_PLAYERS, MOCK_ROOM_CODE, MOCK_ROUND_INDEX } from '@/game/mock';
 import { s, spacing } from '@/theme';
 
 // TV screen 5: correct answer, explanation and ranking after each question.
 export default function TvResults() {
   const { data: round, error, refetch } = useRound(MOCK_ROOM_CODE, MOCK_ROUND_INDEX);
+  useScreenSfx(round ? 'correct' : null);
   if (!round) return <LoadingScreen error={error} onRetry={refetch} />;
 
   const questionIndex = 0;

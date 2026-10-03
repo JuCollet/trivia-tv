@@ -33,6 +33,7 @@ export default function OptionPicker<T extends string | number>({
             label={format(option)}
             variant={option === value ? 'primary' : 'secondary'}
             onPress={() => onChange(option)}
+            sound="option"
             hasTVPreferredFocus={hasTVPreferredFocus && i === 0}
           />
         ))}
