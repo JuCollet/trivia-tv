@@ -12,8 +12,8 @@ import { breakdown } from '@/game/breakdown';
 import { playerName, useGame } from '@/game/GameProvider';
 import { s, spacing } from '@/theme';
 
-// TV screen 5: correct answer, explanation, where each player's points come
-// from, and ranking after each question.
+// TV screen 5: correct answer, explanation, every point won or lost by each
+// player (steal included), and ranking after each question.
 export default function TvResults() {
   const { t } = useTranslation();
   const { view, next } = useGame();

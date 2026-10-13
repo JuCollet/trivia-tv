@@ -86,16 +86,17 @@ const en: Resources = {
     roundEnd: 'End of round',
     nextQuestion: 'Next question',
     breakdown: {
-      title: 'Points for this question',
-      correct: 'Correct answer {{base}} + speed {{speed}}',
-      wrong: 'Wrong answer: speed penalty',
-      noAnswer: 'No answer',
-      masterFinders: 'Theme master: {{points}} per challenger who got it ({{count}})',
-      masterNobody: 'Theme master: no challenger got it',
-      masterWrong: 'Theme master: wrong answer',
-      masterNoAnswer: 'Theme master: no answer',
-      steals: 'steals {{points}} from the master at round end',
-      stolen: 'loses {{points}} to a steal at round end',
+      title: 'Points breakdown',
+      correct: 'correct answer',
+      speed: 'speed',
+      wrong: 'wrong answer, speed lost',
+      noAnswer: 'no answer',
+      masterFinders: 'master: {{count}} × {{each}}',
+      masterNobody: 'master: nobody got it',
+      masterWrong: 'master: wrong answer',
+      masterNoAnswer: 'master: no answer',
+      steals: 'stolen from {{name}}',
+      stolen: 'stolen by {{name}}',
     },
   },
   awards: {
@@ -105,7 +106,7 @@ const en: Resources = {
     next: 'Next',
     plusViteQueSonOmbre: {
       label: 'Faster than their shadow',
-      description: 'The fastest correct answer, ahead of the theme master, steals 200 points from them per question.',
+      description: 'The fastest correct answer, ahead of the theme master, stole 200 points from them per question, already in the ranking.',
     },
     outsider: {
       label: 'The Outsider',
@@ -140,7 +141,7 @@ const en: Resources = {
     },
     master: {
       title: 'The theme master',
-      text: "Whoever picked the theme answers too, but doesn't score their own points: if they get it right, they get 150 points for each player who also got it. A theme everyone knows pays off! And watch out: the fastest correct answer ahead of them steals 200 of their points!",
+      text: "Whoever picked the theme answers too, but doesn't score their own points: if they get it right, they get 150 points for each player who also got it. A theme everyone knows pays off! And watch out: on each question, the fastest correct answer ahead of them steals 200 of their points right away!",
     },
     final: {
       title: 'The mystery final question',

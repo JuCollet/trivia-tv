@@ -85,16 +85,17 @@ const fr = {
     roundEnd: 'Fin de manche',
     nextQuestion: 'Question suivante',
     breakdown: {
-      title: 'Points de la question',
-      correct: 'Bonne réponse {{base}} + rapidité {{speed}}',
-      wrong: 'Mauvaise réponse : pénalité de rapidité',
-      noAnswer: 'Pas de réponse',
-      masterFinders: 'Maître : {{points}} par challenger qui a trouvé ({{count}})',
-      masterNobody: 'Maître : aucun challenger n’a trouvé',
-      masterWrong: 'Maître : mauvaise réponse',
-      masterNoAnswer: 'Maître : pas de réponse',
-      steals: 'vole {{points}} au maître en fin de manche',
-      stolen: 'se fait voler {{points}} en fin de manche',
+      title: 'Détail des points',
+      correct: 'bonne réponse',
+      speed: 'rapidité',
+      wrong: 'mauvaise réponse, rapidité perdue',
+      noAnswer: 'pas de réponse',
+      masterFinders: 'maître : {{count}} × {{each}}',
+      masterNobody: 'maître : personne n’a trouvé',
+      masterWrong: 'maître : mauvaise réponse',
+      masterNoAnswer: 'maître : pas de réponse',
+      steals: 'volés à {{name}}',
+      stolen: 'volés par {{name}}',
     },
   },
   awards: {
@@ -104,7 +105,7 @@ const fr = {
     next: 'Suivant',
     plusViteQueSonOmbre: {
       label: 'Plus vite que son ombre',
-      description: 'Le plus rapide à bien répondre, devant le maître : il lui vole 200 points par question.',
+      description: 'Le plus rapide à bien répondre, devant le maître : il lui a volé 200 points par question, déjà comptés au classement.',
     },
     outsider: {
       label: "L'Outsider",
@@ -139,7 +140,7 @@ const fr = {
     },
     master: {
       title: 'Le maître de la manche',
-      text: "Celui qui a choisi le thème répond aussi, sans marquer ses propres points : s'il trouve, il gagne 150 points par joueur qui a aussi trouvé. Un thème que tout le monde connaît rapporte gros ! Et gare à lui : le plus rapide à bien répondre avant lui lui vole 200 points !",
+      text: "Celui qui a choisi le thème répond aussi, sans marquer ses propres points : s'il trouve, il gagne 150 points par joueur qui a aussi trouvé. Un thème que tout le monde connaît rapporte gros ! Et gare à lui : à chaque question, le plus rapide à bien répondre avant lui lui vole aussitôt 200 points !",
     },
     final: {
       title: 'La question finale mystère',
