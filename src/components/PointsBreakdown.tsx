@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import AppText from './AppText';
 import type { PointsBreakdownLine } from '@/game/breakdown';
+import { MASTER_POINTS_PER_FINDER } from '@/game/rules';
 import { colors, fonts, spacing } from '@/theme';
 
 type Props = {
@@ -19,7 +20,12 @@ export default function PointsBreakdown({ lines, nameOf }: Props) {
         const details = [
           reason === 'correct'
             ? t('results.breakdown.correct', { base: line.basePoints, speed: line.speedBonus })
-            : t(`results.breakdown.${reason}`),
+            : reason === 'masterFinders'
+              ? t('results.breakdown.masterFinders', {
+                  points: MASTER_POINTS_PER_FINDER,
+                  count: line.points / MASTER_POINTS_PER_FINDER,
+                })
+              : t(`results.breakdown.${reason}`),
         ];
         if (steal > 0) details.push(t('results.breakdown.steals', { points: steal }));
         if (steal < 0) details.push(t('results.breakdown.stolen', { points: -steal }));

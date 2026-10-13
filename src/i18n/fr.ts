@@ -89,7 +89,7 @@ const fr = {
       correct: 'Bonne réponse {{base}} + rapidité {{speed}}',
       wrong: 'Mauvaise réponse : pénalité de rapidité',
       noAnswer: 'Pas de réponse',
-      masterAverage: 'Maître : moyenne des challengers',
+      masterFinders: 'Maître : {{points}} par challenger qui a trouvé ({{count}})',
       masterNobody: 'Maître : aucun challenger n’a trouvé',
       masterWrong: 'Maître : mauvaise réponse',
       masterNoAnswer: 'Maître : pas de réponse',
@@ -139,7 +139,7 @@ const fr = {
     },
     master: {
       title: 'Le maître de la manche',
-      text: "Celui qui a choisi le thème répond aussi, sans marquer ses propres points : s'il trouve, il reçoit la moyenne des points des autres sur la question. Si personne d'autre n'a trouvé, c'est zéro. Et gare à lui : le plus rapide à bien répondre avant lui lui vole 200 points !",
+      text: "Celui qui a choisi le thème répond aussi, sans marquer ses propres points : s'il trouve, il gagne 150 points par joueur qui a aussi trouvé. Un thème que tout le monde connaît rapporte gros ! Et gare à lui : le plus rapide à bien répondre avant lui lui vole 200 points !",
     },
     final: {
       title: 'La question finale mystère',

@@ -90,7 +90,7 @@ const en: Resources = {
       correct: 'Correct answer {{base}} + speed {{speed}}',
       wrong: 'Wrong answer: speed penalty',
       noAnswer: 'No answer',
-      masterAverage: 'Theme master: challengers’ average',
+      masterFinders: 'Theme master: {{points}} per challenger who got it ({{count}})',
       masterNobody: 'Theme master: no challenger got it',
       masterWrong: 'Theme master: wrong answer',
       masterNoAnswer: 'Theme master: no answer',
@@ -140,7 +140,7 @@ const en: Resources = {
     },
     master: {
       title: 'The theme master',
-      text: "Whoever picked the theme answers too, but doesn't score their own points: if they get it right, they get the others' average for that question. If nobody else found it, that's zero. And watch out: the fastest correct answer ahead of them steals 200 of their points!",
+      text: "Whoever picked the theme answers too, but doesn't score their own points: if they get it right, they get 150 points for each player who also got it. A theme everyone knows pays off! And watch out: the fastest correct answer ahead of them steals 200 of their points!",
     },
     final: {
       title: 'The mystery final question',
