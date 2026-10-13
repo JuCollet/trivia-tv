@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   timerSeconds: 15,
 };
 
-export const MIN_PLAYERS = 4;
+export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 10;
 export const MAX_THEME_LENGTH = 60;
 export const ROOM_CODE_LENGTH = 4;
@@ -24,7 +24,7 @@ export const AWARDS: Record<AwardId, { label: string; description: string }> = {
   },
   seulContreTous: {
     label: 'Seul contre tous',
-    description: 'Seul challenger à trouver une question : +150 par question.',
+    description: 'Seul challenger à trouver une question (dès 3 joueurs) : +150 par question.',
   },
   pasMonTruc: {
     label: 'Finalement pas mon truc',
