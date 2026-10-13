@@ -7,7 +7,7 @@ export type PointsReason =
   | 'correct'
   | 'wrong'
   | 'noAnswer'
-  | 'masterAverage'
+  | 'masterFinders'
   | 'masterNobody'
   | 'masterWrong'
   | 'masterNoAnswer';
@@ -43,11 +43,11 @@ function challengerReason(line: ScoreLine): PointsReason {
 }
 
 // The master doesn't score their own answer: when right, they get the
-// challengers' average, as long as at least one challenger found it.
+// 150 points per challenger who found it.
 function masterReason(line: ScoreLine, challengers: ScoreLine[]): PointsReason {
   if (line.choice === null) return 'masterNoAnswer';
   if (!line.correct) return 'masterWrong';
-  return challengers.some((c) => c.correct) ? 'masterAverage' : 'masterNobody';
+  return challengers.some((c) => c.correct) ? 'masterFinders' : 'masterNobody';
 }
 
 // The fastest correct challenger steals from the master, unless the master

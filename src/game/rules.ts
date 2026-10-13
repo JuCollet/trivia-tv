@@ -14,6 +14,7 @@ export const MAX_THEME_LENGTH = 60;
 export const ROOM_CODE_LENGTH = 4;
 // Points the fastest correct challenger steals from the master on each question.
 export const STEAL_POINTS_PER_QUESTION = 200;
+export const MASTER_POINTS_PER_FINDER = 150;
 
 // Rough game length shown in the lobby: each question adds its timer plus the
 // answer reveal, each theme adds its announcement and end-of-round awards,
