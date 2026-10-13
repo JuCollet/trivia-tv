@@ -16,7 +16,7 @@ export const ROOM_CODE_LENGTH = 4;
 export const AWARDS: Record<AwardId, { label: string; description: string }> = {
   plusViteQueSonOmbre: {
     label: 'Plus vite que son ombre',
-    description: 'Le plus rapide à bien répondre, devant le maître : il lui vole 100 points par question.',
+    description: 'Le plus rapide à bien répondre, devant le maître : il lui vole 200 points par question.',
   },
   outsider: {
     label: "L'Outsider",

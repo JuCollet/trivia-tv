@@ -27,8 +27,8 @@ export const MOCK_ROUND: ThemeRound = {
 };
 
 export const MOCK_AWARDS: Award[] = [
-  { id: 'plusViteQueSonOmbre', playerId: 'p1', points: 200 },
-  { id: 'plusViteQueSonOmbre', playerId: 'p4', points: 100 },
+  { id: 'plusViteQueSonOmbre', playerId: 'p1', points: 400 },
+  { id: 'plusViteQueSonOmbre', playerId: 'p4', points: 200 },
   { id: 'outsider', playerId: 'p4', points: 200 },
   { id: 'bonnetDane', playerId: 'p3', points: 0 },
   { id: 'seulContreTous', playerId: 'p1', points: 150 },
