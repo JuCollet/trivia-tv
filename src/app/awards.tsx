@@ -12,7 +12,6 @@ import { useScreenSfx } from '@/hooks/useScreenSfx';
 import { colors, radius, s, spacing } from '@/theme';
 
 const AWARD_SFX: Record<AwardId, SfxName> = {
-  bonTheme: 'bonus',
   plusViteQueSonOmbre: 'steal',
   outsider: 'award',
   seulContreTous: 'award',
