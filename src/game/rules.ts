@@ -12,29 +12,27 @@ export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 10;
 export const MAX_THEME_LENGTH = 60;
 export const ROOM_CODE_LENGTH = 4;
+// Points the fastest correct challenger steals from the master on each question.
+export const STEAL_POINTS_PER_QUESTION = 200;
 
-export const AWARDS: Record<AwardId, { label: string; description: string }> = {
-  plusViteQueSonOmbre: {
-    label: 'Plus vite que son ombre',
-    description: 'Le plus rapide à bien répondre, devant le maître : il lui vole 200 points par question.',
-  },
-  outsider: {
-    label: "L'Outsider",
-    description: 'Sans-faute sur la manche : +200.',
-  },
-  seulContreTous: {
-    label: 'Seul contre tous',
-    description: 'Seul challenger à trouver une question (dès 3 joueurs) : +150 par question.',
-  },
-  pasMonTruc: {
-    label: 'Finalement pas mon truc',
-    description: 'Le maître ne trouve aucune réponse sur son propre thème : −200.',
-  },
-  bonnetDane: {
-    label: "Bonnet d'âne",
-    description: 'Aucune bonne réponse sur la manche : badge seul.',
-  },
-};
+// Rough game length shown in the lobby: each question adds its timer plus the
+// answer reveal, each theme adds its announcement and end-of-round awards,
+// and the mystery final closes the game.
+const SECONDS_AFTER_QUESTION = 30;
+const SECONDS_PER_THEME = 45;
+const SECONDS_FINALE = 120;
+
+// Based on the players who joined, so it grows as they arrive. Null while
+// nobody has joined: there is nothing to estimate yet.
+export function estimateGameMinutes(settings: GameSettings, playerCount: number): number | null {
+  if (playerCount === 0) return null;
+  const themes = settings.rounds * playerCount;
+  const questions = themes * settings.questionsPerTheme;
+  const seconds =
+    questions * (settings.timerSeconds + SECONDS_AFTER_QUESTION) + themes * SECONDS_PER_THEME + SECONDS_FINALE;
+  // Rounded to the minute, so that each setting visibly changes it.
+  return Math.max(1, Math.round(seconds / 60));
+}
 
 const MAX_PRIZES_SHOWN = 3;
 const STEAL: AwardId = 'plusViteQueSonOmbre';

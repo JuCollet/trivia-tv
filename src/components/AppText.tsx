@@ -1,5 +1,5 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
-import { colors, fontSize } from '@/theme';
+import { colors, fonts, fontSize } from '@/theme';
 
 type Variant = 'caption' | 'body' | 'title' | 'display' | 'hero';
 
@@ -20,21 +20,23 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   caption: {
+    fontFamily: fonts.body,
     fontSize: fontSize.caption,
   },
   body: {
+    fontFamily: fonts.body,
     fontSize: fontSize.body,
   },
   title: {
+    fontFamily: fonts.display,
     fontSize: fontSize.title,
-    fontWeight: '700',
   },
   display: {
+    fontFamily: fonts.display,
     fontSize: fontSize.display,
-    fontWeight: '800',
   },
   hero: {
+    fontFamily: fonts.display,
     fontSize: fontSize.hero,
-    fontWeight: '900',
   },
 });

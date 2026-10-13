@@ -10,6 +10,8 @@ type Props<T extends string | number> = {
   onChange: (value: T) => void;
   format?: (value: T) => string;
   hasTVPreferredFocus?: boolean;
+  // Still focusable, but a press is refused with a sound.
+  disabled?: boolean;
 };
 
 // Settings row: a label and options selectable with the D-pad.
@@ -20,6 +22,7 @@ export default function OptionPicker<T extends string | number>({
   onChange,
   format = String,
   hasTVPreferredFocus,
+  disabled,
 }: Props<T>) {
   return (
     <View style={styles.row}>
@@ -34,6 +37,7 @@ export default function OptionPicker<T extends string | number>({
             variant={option === value ? 'primary' : 'secondary'}
             onPress={() => onChange(option)}
             sound="option"
+            disabled={disabled && option !== value}
             hasTVPreferredFocus={hasTVPreferredFocus && i === 0}
           />
         ))}

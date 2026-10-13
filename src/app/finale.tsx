@@ -1,38 +1,27 @@
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
+import LoadingScreen from '@/components/LoadingScreen';
 import Screen from '@/components/Screen';
 import { useScreenSfx } from '@/hooks/useScreenSfx';
-import { MOCK_PLAYERS } from '@/game/mock';
+import { useGame } from '@/game/GameProvider';
 import { colors, radius, s, spacing } from '@/theme';
 
 const PODIUM_HEIGHTS = [s(140), s(100), s(72)];
 
-// TV screen 7: mystery final question announcement (points ×2), then podium and badges.
+// TV screen 7: final podium, after the mystery final question.
 export default function TvFinale() {
-  const [step, setStep] = useState<'intro' | 'podium'>('intro');
-  // The finale impact is much louder than the other sounds.
-  useScreenSfx(step === 'intro' ? 'finale-intro' : 'podium', step === 'intro' ? 0.5 : 1);
-  const podium = [...MOCK_PLAYERS].sort((a, b) => b.score - a.score).slice(0, 3);
-
-  if (step === 'intro') {
-    return (
-      <Screen centered>
-        <AppText variant="title" muted>
-          Question finale mystère
-        </AppText>
-        <AppText variant="hero">Points ×2</AppText>
-        {/* TODO: go to /question with the randomly drawn theme. */}
-        <FocusableButton label="Voir le podium" onPress={() => setStep('podium')} hasTVPreferredFocus />
-      </Screen>
-    );
-  }
+  const { t } = useTranslation();
+  const { view, newGame } = useGame();
+  useScreenSfx('podium');
+  if (!view?.podium) return <LoadingScreen />;
+  // Ranked by the server, ties broken by correct answers then speed.
+  const podium = view.podium.slice(0, 3).map((entry) => ({ id: entry.playerId, ...entry }));
 
   return (
     <Screen centered>
-      <AppText variant="display">Podium</AppText>
+      <AppText variant="display">{t('finale.podium')}</AppText>
       <View style={styles.podium}>
         {[podium[1], podium[0], podium[2]].map((player) => {
           if (!player) return null;
@@ -40,7 +29,7 @@ export default function TvFinale() {
           return (
             <View key={player.id} style={styles.step}>
               <AppText variant="title">{player.name}</AppText>
-              <AppText muted>{player.score} pts</AppText>
+              <AppText muted>{t('finale.points', { count: player.score })}</AppText>
               <View style={[styles.block, { height: PODIUM_HEIGHTS[rank] }]}>
                 <AppText variant="display">{rank + 1}</AppText>
               </View>
@@ -49,7 +38,8 @@ export default function TvFinale() {
         })}
       </View>
       {/* TODO: game badges (awards accumulated per player). */}
-      <FocusableButton label="Nouvelle partie" onPress={() => router.replace('/')} sound="start" hasTVPreferredFocus />
+      {/* The phones follow the new game: everyone plays again without scanning. */}
+      <FocusableButton label={t('common.newGame')} onPress={() => newGame()} sound="start" hasTVPreferredFocus />
     </Screen>
   );
 }

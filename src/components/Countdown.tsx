@@ -5,15 +5,17 @@ import { playSfx, stopSfx } from '@/audio/sounds';
 import { colors, s } from '@/theme';
 
 type Props = {
-  seconds: number;
+  // Server time at which the question closes.
+  endsAt: string;
   onEnd?: () => void;
 };
 
 // The tick-tock sound lasts exactly this long and ends with the timer.
 const TICK_SECONDS = 5;
 
-// Local timer for the prototype. In game, the server is the source of truth.
-export default function Countdown({ seconds, onEnd }: Props) {
+// Display only: the server ends the question at `endsAt`.
+export default function Countdown({ endsAt, onEnd }: Props) {
+  const [seconds] = useState(() => Math.max(0, Math.ceil((Date.parse(endsAt) - Date.now()) / 1000)));
   const [remaining, setRemaining] = useState(seconds);
 
   useEffect(() => {

@@ -1,40 +1,47 @@
-import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import AnswerTile from '@/components/AnswerTile';
-import { useRound } from '@/api/rounds';
 import AppText from '@/components/AppText';
 import Countdown from '@/components/Countdown';
-import FocusableButton from '@/components/FocusableButton';
 import LoadingScreen from '@/components/LoadingScreen';
 import Screen from '@/components/Screen';
-import { MOCK_PLAYERS, MOCK_ROOM_CODE, MOCK_ROUND_INDEX } from '@/game/mock';
-import { DEFAULT_SETTINGS } from '@/game/rules';
+import { useGame } from '@/game/GameProvider';
 import { spacing } from '@/theme';
 
 // TV screen 4: question, 4 colored choices, timer and number of answers received.
+// The server closes the question when the timer ends or everyone has answered.
 export default function TvQuestion() {
-  const { data: round, error, refetch } = useRound(MOCK_ROOM_CODE, MOCK_ROUND_INDEX);
-  const answeredCount = 2;
-  const showResults = useCallback(() => router.replace('/results'), []);
-  if (!round) return <LoadingScreen error={error} onRetry={refetch} />;
+  const { t } = useTranslation();
+  const { view } = useGame();
+  const question = view?.question;
+  const round = view?.round;
+  if (!view || !question || !round) return <LoadingScreen />;
 
-  const question = round.questions[0];
+  const playerCount = view.players.filter((p) => p.connected).length;
 
   return (
     <Screen>
       <View style={styles.header}>
         <AppText muted>
-          {round.theme} · Question 1/{round.questions.length}
+          {round.isFinal ? t('question.finalMystery') : round.theme} ·{' '}
+          {round.isFinal
+            ? t('question.multiplier', { multiplier: question.multiplier })
+            : t('question.progress', { number: question.number, total: question.total })}
         </AppText>
-        <Countdown seconds={DEFAULT_SETTINGS.timerSeconds} onEnd={showResults} />
+        <Countdown key={question.sequence} endsAt={question.endsAt} />
         <AppText muted>
-          {answeredCount}/{MOCK_PLAYERS.length} ont répondu
+          {t('question.answered', { count: question.answeredCount, total: playerCount })}
         </AppText>
       </View>
 
+      {round.isFinal && round.theme ? (
+        <AppText variant="title" style={styles.theme}>
+          {t('question.finalTheme', { theme: round.theme })}
+        </AppText>
+      ) : null}
+
       <AppText variant="display" style={styles.question}>
-        {question.question}
+        {question.text}
       </AppText>
 
       <View style={styles.grid}>
@@ -47,9 +54,6 @@ export default function TvQuestion() {
           <AnswerTile index={3} label={question.choices[3]} />
         </View>
       </View>
-
-      {/* The host can stop the timer once everyone has answered. */}
-      <FocusableButton label="Révéler" variant="secondary" onPress={showResults} style={styles.skip} />
     </Screen>
   );
 }
@@ -59,6 +63,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  theme: {
+    textAlign: 'center',
+    marginTop: spacing.md,
   },
   question: {
     textAlign: 'center',
@@ -72,8 +80,5 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  skip: {
-    alignSelf: 'flex-end',
   },
 });

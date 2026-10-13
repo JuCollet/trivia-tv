@@ -1,8 +1,13 @@
-// Minimal HTTP client for request/response data.
-// Real-time game state goes through Socket.IO, not here.
+import { createRestClient } from '@jucollet/trivia-client/rest';
 
-// Without a configured URL, calls fall back to the mock data.
-export const API_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '') ?? null;
+// Game server URL. In development, the tvOS simulator reaches the server
+// running on the Mac through localhost.
+export const API_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '') || 'http://localhost:8080';
+
+// Optional address of the phone web app shown on the lobby (e.g. http://192.168.1.10:5173).
+export const JOIN_URL = process.env.EXPO_PUBLIC_JOIN_URL?.replace(/\/+$/, '') || null;
+
+export const api = createRestClient({ baseUrl: API_URL });
 
 export class ApiError extends Error {
   constructor(
@@ -12,15 +17,4 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
-}
-
-export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
-  if (!API_URL) throw new Error('EXPO_PUBLIC_API_URL non défini');
-
-  const response = await fetch(`${API_URL}${path}`, {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
-  if (!response.ok) throw new ApiError(response.status, `GET ${path} : ${response.status}`);
-  return response.json() as Promise<T>;
 }

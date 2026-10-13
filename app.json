@@ -28,7 +28,19 @@
       ],
       "expo-video",
       "expo-router",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/lilita-one/400Regular/LilitaOne_400Regular.ttf",
+            "node_modules/@expo-google-fonts/fredoka/400Regular/Fredoka_400Regular.ttf",
+            "node_modules/@expo-google-fonts/fredoka/500Medium/Fredoka_500Medium.ttf",
+            "node_modules/@expo-google-fonts/fredoka/600SemiBold/Fredoka_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/fredoka/700Bold/Fredoka_700Bold.ttf"
+          ]
+        }
+      ]
     ],
     "android": {
       "package": "com.jucollet.triviatv",

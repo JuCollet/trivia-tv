@@ -20,3 +20,9 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+# local env files
+.env*.local
+
+# Scratch files from Claude sessions
+Claude outputs/

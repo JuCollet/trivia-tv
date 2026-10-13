@@ -7,11 +7,14 @@ export const MOCK_ROOM_CODE = 'BRIE';
 export const MOCK_ROUND_INDEX = 0;
 
 export const MOCK_PLAYERS: Player[] = [
-  { id: 'p1', name: 'Julien', score: 2450, themesReady: true },
-  { id: 'p2', name: 'Camille', score: 2100, themesReady: true },
-  { id: 'p3', name: 'Sam', score: 1720, themesReady: false },
-  { id: 'p4', name: 'Léa', score: 980, themesReady: true },
+  { id: 'p1', name: 'Julien', score: 2450, themesEntered: 2 },
+  { id: 'p2', name: 'Léa', score: 2100, themesEntered: 2 },
+  { id: 'p3', name: 'Max', score: 1720, themesEntered: 2 },
+  { id: 'p4', name: 'Sophie', score: 980, themesEntered: 1 },
+  { id: 'p5', name: 'Tom', score: 640, themesEntered: 0 },
 ];
+
+export const MOCK_HOST_ID = 'p1';
 
 export const MOCK_ROUND: ThemeRound = {
   theme: 'Les fromages',

@@ -1,17 +1,23 @@
-import { useEffect, useId, useState, type Ref } from 'react';
-import { Pressable, StyleSheet, type View, type ViewStyle } from 'react-native';
+import { useEffect, useId, useState, type ComponentProps, type Ref } from 'react';
+import { Pressable, StyleSheet, type TextStyle, type View, type ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import { playSfx, type SfxName } from '@/audio/sounds';
 import { colors, radius, s, spacing } from '@/theme';
+
+type Variant = 'primary' | 'secondary' | 'outline' | 'launch';
 
 type Props = {
   label: string;
   onPress?: () => void;
   // On TV, the button that gets focus when the screen opens.
   hasTVPreferredFocus?: boolean;
-  variant?: 'primary' | 'secondary';
+  variant?: Variant;
+  // Icon drawn before the label, at the label's size and color.
+  icon?: ComponentProps<typeof Ionicons>['name'];
   disabled?: boolean;
   style?: ViewStyle;
+  labelStyle?: TextStyle;
   ref?: Ref<View>;
   // Sound played on press: 'start' for the important buttons.
   sound?: SfxName;
@@ -26,8 +32,16 @@ let lastFocusedId: string | null = null;
 // Off while the splash screen covers the app: nothing can be seen anyway.
 let focusSoundEnabled = true;
 
+// Off while the splash screen covers the app: OK on the remote skips the
+// intro and must not also press the button focused underneath.
+let pressEnabled = true;
+
 export function setFocusSoundEnabled(enabled: boolean) {
   focusSoundEnabled = enabled;
+}
+
+export function setPressEnabled(enabled: boolean) {
+  pressEnabled = enabled;
 }
 
 // D-pad controllable button: focus is shown with an outline and a slight zoom.
@@ -36,8 +50,10 @@ export default function FocusableButton({
   onPress,
   hasTVPreferredFocus,
   variant = 'primary',
+  icon,
   disabled,
   style,
+  labelStyle,
   ref,
   sound = 'click',
 }: Props) {
@@ -48,10 +64,13 @@ export default function FocusableButton({
     skipNextFocusSound = true;
   }, []);
 
+  const textStyle = StyleSheet.flatten<TextStyle>([styles.label, LABEL_STYLES[variant], labelStyle]);
+
   return (
     <Pressable
       ref={ref}
       onPress={() => {
+        if (!pressEnabled) return;
         // A disabled button stays focusable so the press can be refused with a sound.
         if (disabled) {
           void playSfx('disabled');
@@ -77,13 +96,20 @@ export default function FocusableButton({
       accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.base,
-        variant === 'primary' ? styles.primary : styles.secondary,
+        styles[variant],
         focused && styles.focused,
         (pressed || disabled) && styles.dimmed,
         style,
       ]}
     >
-      <AppText variant="title" style={variant === 'primary' && styles.primaryLabel}>
+      {icon ? (
+        <Ionicons
+          name={icon}
+          size={textStyle.fontSize}
+          color={textStyle.color as string}
+        />
+      ) : null}
+      <AppText variant="title" style={textStyle}>
         {label}
       </AppText>
     </Pressable>
@@ -97,16 +123,31 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: s(3),
     borderColor: 'transparent',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  label: {
+    color: colors.text,
+    fontSize: s(20),
   },
   primary: {
     backgroundColor: colors.accent,
   },
-  primaryLabel: {
-    color: colors.background,
-  },
   secondary: {
     backgroundColor: colors.surfaceRaised,
+  },
+  outline: {
+    backgroundColor: colors.panel,
+    borderColor: colors.panelBorder,
+  },
+  // Big red call to action with a darker bottom edge, like an arcade button.
+  launch: {
+    backgroundColor: colors.launch,
+    borderBottomColor: colors.launchEdge,
+    borderBottomWidth: s(5),
+    borderRadius: radius.lg,
   },
   focused: {
     borderColor: colors.focus,
@@ -115,4 +156,11 @@ const styles = StyleSheet.create({
   dimmed: {
     opacity: 0.6,
   },
+});
+
+const LABEL_STYLES = StyleSheet.create({
+  primary: { color: colors.background },
+  secondary: {},
+  outline: {},
+  launch: {},
 });

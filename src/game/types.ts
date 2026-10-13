@@ -11,7 +11,8 @@ export type Player = {
   id: string;
   name: string;
   score: number;
-  themesReady: boolean;
+  // Themes already typed in secret on the phone, one per round.
+  themesEntered: number;
 };
 
 export type Question = {
