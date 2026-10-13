@@ -28,7 +28,6 @@ export type ThemeRound = {
 };
 
 export type AwardId =
-  | 'bonTheme'
   | 'plusViteQueSonOmbre'
   | 'outsider'
   | 'seulContreTous'
