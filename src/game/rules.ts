@@ -20,7 +20,7 @@ export const AWARDS: Record<AwardId, { label: string; description: string }> = {
   },
   plusViteQueSonOmbre: {
     label: 'Plus vite que son ombre',
-    description: 'Un challenger bat le maître sur au moins la moitié des questions : il lui vole 300 points.',
+    description: 'Le plus rapide à bien répondre, devant le maître : il lui vole 100 points par question.',
   },
   outsider: {
     label: "L'Outsider",
