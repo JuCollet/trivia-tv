@@ -1,53 +1,77 @@
 import type { TvView } from '@jucollet/trivia-client/schema';
-import { STEAL_POINTS_PER_QUESTION } from './rules';
+import { MASTER_POINTS_PER_FINDER, STEAL_POINTS_PER_QUESTION } from './rules';
 
 export type ScoreLine = NonNullable<TvView['result']>['scores'][number];
 
-export type PointsReason =
+export type PointsPartKind =
   | 'correct'
+  | 'speed'
   | 'wrong'
   | 'noAnswer'
   | 'masterFinders'
   | 'masterNobody'
   | 'masterWrong'
-  | 'masterNoAnswer';
+  | 'masterNoAnswer'
+  | 'steals'
+  | 'stolen';
+
+// One source of points: positive when won, negative when lost, 0 to only
+// explain why a player got nothing.
+export type PointsPart = {
+  kind: PointsPartKind;
+  points: number;
+  // masterFinders: how many challengers found the answer.
+  count?: number;
+  // steals and stolen: the other player of the steal.
+  otherId?: string;
+};
 
 export type PointsBreakdownLine = {
   line: ScoreLine;
-  reason: PointsReason;
-  // Steal settled at the end of the round, so not in the score yet:
-  // positive for the challenger who steals, negative for the master.
-  steal: number;
+  parts: PointsPart[];
 };
 
-// Explains each player's points on a question. Mirrors the server rules
-// (Scoring and RoundAwards in trivia-server): keep them in sync.
+// Explains each player's points on a question. The parts add up to
+// `line.points`, which already includes the steal. Mirrors the server rules
+// (Scoring in trivia-server): keep them in sync.
 export function breakdown(scores: ScoreLine[], masterId: string | null | undefined): PointsBreakdownLine[] {
   const master = scores.find((line) => line.playerId === masterId);
   const challengers = scores.filter((line) => line.playerId !== masterId);
   const stealer = master ? findStealer(challengers, master) : null;
-  const stolen = stealer ? STEAL_POINTS_PER_QUESTION : 0;
 
   return scores
-    .map((line) => ({
-      line,
-      reason: line === master ? masterReason(line, challengers) : challengerReason(line),
-      steal: line === stealer ? stolen : line === master ? -stolen : 0,
-    }))
+    .map((line) => {
+      const parts = line === master ? masterParts(line, challengers, stealer) : challengerParts(line);
+      if (master && line === stealer) {
+        parts.push({ kind: 'steals', points: STEAL_POINTS_PER_QUESTION, otherId: master.playerId });
+      }
+      return { line, parts };
+    })
     .sort((a, b) => b.line.points - a.line.points);
 }
 
-function challengerReason(line: ScoreLine): PointsReason {
-  if (line.choice === null) return 'noAnswer';
-  return line.correct ? 'correct' : 'wrong';
+function challengerParts(line: ScoreLine): PointsPart[] {
+  if (line.choice === null) return [{ kind: 'noAnswer', points: 0 }];
+  if (!line.correct) return [{ kind: 'wrong', points: -line.speedBonus }];
+  const parts: PointsPart[] = [{ kind: 'correct', points: line.basePoints }];
+  if (line.speedBonus > 0) parts.push({ kind: 'speed', points: line.speedBonus });
+  return parts;
 }
 
 // The master doesn't score their own answer: when right, they get the
-// 150 points per challenger who found it.
-function masterReason(line: ScoreLine, challengers: ScoreLine[]): PointsReason {
-  if (line.choice === null) return 'masterNoAnswer';
-  if (!line.correct) return 'masterWrong';
-  return challengers.some((c) => c.correct) ? 'masterFinders' : 'masterNobody';
+// 150 points per challenger who found it. A steal is then taken from them.
+function masterParts(line: ScoreLine, challengers: ScoreLine[], stealer: ScoreLine | null): PointsPart[] {
+  const finders = challengers.filter((c) => c.correct).length;
+  const parts: PointsPart[] =
+    line.choice === null
+      ? [{ kind: 'masterNoAnswer', points: 0 }]
+      : !line.correct
+        ? [{ kind: 'masterWrong', points: 0 }]
+        : finders > 0
+          ? [{ kind: 'masterFinders', points: finders * MASTER_POINTS_PER_FINDER, count: finders }]
+          : [{ kind: 'masterNobody', points: 0 }];
+  if (stealer) parts.push({ kind: 'stolen', points: -STEAL_POINTS_PER_QUESTION, otherId: stealer.playerId });
+  return parts;
 }
 
 // The fastest correct challenger steals from the master, unless the master
