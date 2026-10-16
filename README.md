@@ -1,4 +1,17 @@
-# TV Example
+# Chacun son truc : écran TV
+
+L'écran de la partie, pour Android TV (APK installé sur le projecteur) et pour le navigateur.
+
+## Version web
+
+La même app tourne dans un navigateur, sur https://trivia.julco.dev/tv : un ordinateur branché sur la télé suffit.
+
+- `npm run build:web` produit `dist/`, servi sous `/tv` (`experiments.baseUrl` dans `app.json`).
+- La CI le publie sur Cloudflare Pages (projet `trivia-tv`) à chaque push sur `master`, et trivia-client relaie `/tv` vers ce projet.
+- Les fichiers `*.web.ts(x)` remplacent leur version TV dans le navigateur : le clavier remplace la télécommande (flèches, Entrée, Échap pour le menu), l'intro attend un clic (un navigateur ne joue pas de son avant), les polices sont chargées au démarrage.
+- Variables du dépôt (*Settings → Secrets and variables → Actions*) : `API_URL`, `JOIN_URL`, `CLOUDFLARE_ACCOUNT_ID` (variables), `CLOUDFLARE_API_TOKEN` (secret, permission *Cloudflare Pages: Edit*).
+
+## Modèle Expo d'origine
 
 This is an Expo project that can be built for Apple TV and Android TV targets, and also supports mobile and web platforms.
 

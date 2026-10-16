@@ -9,6 +9,10 @@ const en: Resources = {
     newGame: 'New game',
     seconds: '{{count}} s',
   },
+  web: {
+    start: 'Click or press Enter to start',
+    menu: 'Menu',
+  },
   errors: {
     createFailed: "Couldn't create the game",
     unreachable: 'Server unreachable ({{url}})',

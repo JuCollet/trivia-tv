@@ -58,7 +58,8 @@
     "slug": "trivia-tv",
     "scheme": "chacunsontruc",
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/tv"
     },
     "web": {
       "bundler": "metro",

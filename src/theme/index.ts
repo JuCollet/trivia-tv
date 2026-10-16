@@ -2,8 +2,15 @@ import { Dimensions, Platform } from 'react-native';
 
 // Sizes are designed for a 960×540 TV canvas (Android TV's logical resolution at 1080p).
 // On TV they scale with the actual width: ×1 on Android TV, ×2 on Apple TV (1920 points).
+// In a browser, with the window, so that the whole 16:9 canvas fits in it.
 const TV_CANVAS_WIDTH = 960;
-const scale = Platform.isTV ? Dimensions.get('window').width / TV_CANVAS_WIDTH : 1;
+const TV_CANVAS_HEIGHT = 540;
+const window = Dimensions.get('window');
+const scale = Platform.isTV
+  ? window.width / TV_CANVAS_WIDTH
+  : Platform.OS === 'web'
+    ? Math.min(window.width / TV_CANVAS_WIDTH, window.height / TV_CANVAS_HEIGHT)
+    : 1;
 export const s = (value: number) => Math.round(value * scale);
 
 export const colors = {

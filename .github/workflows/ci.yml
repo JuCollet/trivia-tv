@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  # @jucollet/trivia-client is published on GitHub Packages by trivia-server
+  packages: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: npm run typecheck
+      - run: npm run lint
+
+      # The browser version of the TV screen, served at https://trivia.julco.dev/tv (app.json: experiments.baseUrl).
+      # EXPO_PUBLIC_* are read at build time.
+      - run: npm run build:web
+        env:
+          EXPO_PUBLIC_API_URL: ${{ vars.API_URL }}
+          EXPO_PUBLIC_JOIN_URL: ${{ vars.JOIN_URL }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: web
+          path: dist/
+
+  # On master only: publishes the web build on Cloudflare Pages, project trivia-tv (created by trivia-infra).
+  # trivia-client serves it under /tv, so the TV and the phones share one address.
+  deploy:
+    name: Deploy
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: web
+          path: dist/
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=trivia-tv --branch=master

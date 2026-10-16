@@ -8,6 +8,7 @@ import { setFocusSoundEnabled, setPressEnabled } from '@/components/FocusableBut
 import GameMenu from '@/components/GameMenu';
 import SplashOverlay from '@/components/SplashOverlay';
 import { GameProvider } from '@/game/GameProvider';
+import { useWebFonts } from '@/hooks/useWebFonts';
 import { colors } from '@/theme';
 import '@/i18n';
 
@@ -15,6 +16,7 @@ preloadSfx(...UI_SFX);
 
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
+  useWebFonts();
 
   // Focus sounds and button presses stay off while the splash screen covers
   // the app. Driven by state rather than module code, so a fast refresh cannot

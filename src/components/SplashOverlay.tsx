@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, StyleSheet, useTVEventHandler, useWindowDimensions } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, useWindowDimensions } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useRemoteEvents } from '@/hooks/useRemoteEvents';
 
 // Keeps the native splash visible until the still background is on screen.
 SplashScreen.preventAutoHideAsync();
@@ -53,7 +54,7 @@ export default function SplashOverlay({ onDone }: { onDone: () => void }) {
   }, [opacity, player, onDone]);
 
   // OK on the remote skips the intro.
-  useTVEventHandler((event) => {
+  useRemoteEvents((event) => {
     if (started && event.eventType === 'select') leave();
   });
 

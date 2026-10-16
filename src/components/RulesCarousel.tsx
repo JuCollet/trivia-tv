@@ -1,11 +1,12 @@
 import { useState, type ComponentProps } from 'react';
-import { Image, Modal, StyleSheet, useTVEventHandler, View } from 'react-native';
+import { Image, Modal, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import AppText from './AppText';
 import FocusableButton from './FocusableButton';
 import { playSfx } from '@/audio/sounds';
 import type { AwardId } from '@/game/types';
+import { useRemoteEvents } from '@/hooks/useRemoteEvents';
 import { colors, fonts, radius, s, spacing } from '@/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -66,7 +67,7 @@ function Carousel({ onClose }: { onClose: () => void }) {
   };
 
   // The button is the only focusable element, so the arrows never move focus.
-  useTVEventHandler((event) => {
+  useRemoteEvents((event) => {
     // Android TV sends key down (0) then key up (1): act on the press only.
     if (event.eventKeyAction === 1) return;
     if (event.eventType === 'left') go(-1);
