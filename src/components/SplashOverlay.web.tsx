@@ -1,0 +1,86 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Image, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import * as SplashScreen from 'expo-splash-screen';
+import AppText from './AppText';
+import { resumeMusic } from '@/audio/sounds';
+import { useRemoteEvents } from '@/hooks/useRemoteEvents';
+import { s, spacing } from '@/theme';
+
+const BACKGROUND = require('../../assets/splash/background.jpg');
+const LOGO = require('../../assets/splash/logo.png');
+const FADE_MS = 500;
+const LOGO_RATIO = 1672 / 941;
+const LOGO_WIDTH = 0.42;
+
+// In a browser, the intro waits for a click: a page may only play sound after
+// one, so the lobby music starts with it.
+export default function SplashOverlay({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation();
+  const [opacity] = useState(() => new Animated.Value(1));
+  const [promptOpacity] = useState(() => new Animated.Value(1));
+  const leaving = useRef(false);
+  const { width: screenWidth } = useWindowDimensions();
+  const logoWidth = Math.round(screenWidth * LOGO_WIDTH);
+
+  const leave = useCallback(() => {
+    if (leaving.current) return;
+    leaving.current = true;
+    resumeMusic();
+    Animated.timing(opacity, { toValue: 0, duration: FADE_MS, useNativeDriver: false }).start(onDone);
+  }, [opacity, onDone]);
+
+  useRemoteEvents((event) => {
+    if (event.eventType === 'select') leave();
+  });
+
+  useEffect(() => {
+    SplashScreen.hide();
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(promptOpacity, { toValue: 0.4, duration: 900, useNativeDriver: false }),
+        Animated.timing(promptOpacity, { toValue: 1, duration: 900, useNativeDriver: false }),
+      ]),
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [promptOpacity]);
+
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { opacity }]}>
+      <Pressable style={styles.container} onPress={leave}>
+        <Image source={BACKGROUND} style={styles.fill} resizeMode="cover" />
+        <Image
+          source={LOGO}
+          style={{ width: logoWidth, height: Math.round(logoWidth / LOGO_RATIO) }}
+          resizeMode="contain"
+        />
+        <Animated.View style={[styles.prompt, { opacity: promptOpacity }]}>
+          <AppText variant="title">{t('web.start')}</AppText>
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    backgroundColor: '#0B1260',
+    cursor: 'pointer',
+  },
+  fill: {
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
+  },
+  prompt: {
+    paddingHorizontal: s(24),
+    paddingVertical: s(10),
+    borderRadius: s(999),
+    backgroundColor: 'rgba(3, 6, 40, 0.6)',
+  },
+});

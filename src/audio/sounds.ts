@@ -52,6 +52,12 @@ export function playMusic(source: AudioSource, volume = 0.5) {
   musicPlayer.play();
 }
 
+// Starts the current track again. A browser refuses to play sound before the
+// first click: the web start screen calls this from that click.
+export function resumeMusic() {
+  if (musicPlayer && currentMusic) musicPlayer.play();
+}
+
 // Stops the music, unless another screen already switched to a different track.
 export function stopMusic(source?: AudioSource) {
   if (!musicPlayer || (source && source !== currentMusic)) return;

@@ -8,6 +8,11 @@ const fr = {
     newGame: 'Nouvelle partie',
     seconds: '{{count}} s',
   },
+  // Browser version only
+  web: {
+    start: 'Cliquer ou appuyer sur Entrée pour commencer',
+    menu: 'Menu',
+  },
   errors: {
     createFailed: 'Impossible de créer la partie',
     unreachable: 'Serveur injoignable ({{url}})',
