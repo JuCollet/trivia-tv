@@ -59,10 +59,11 @@ function Carousel({ onClose }: { onClose: () => void }) {
   const page = PAGES[index];
   const isLast = index === PAGES.length - 1;
 
-  const go = (step: number) => {
+  // The button plays its own sound: only the remote's arrows need one here.
+  const go = (step: number, sound = true) => {
     const next = index + step;
     if (next < 0 || next >= PAGES.length) return;
-    void playSfx('option');
+    if (sound) void playSfx('option');
     setIndex(next);
   };
 
@@ -127,7 +128,8 @@ function Carousel({ onClose }: { onClose: () => void }) {
           <FocusableButton
             label={isLast ? t('rules.close') : t('rules.next')}
             icon={isLast ? 'checkmark' : 'arrow-forward'}
-            onPress={isLast ? onClose : () => go(1)}
+            onPress={isLast ? onClose : () => go(1, false)}
+            sound={isLast ? 'click' : 'option'}
             hasTVPreferredFocus
           />
         </View>
