@@ -2,6 +2,15 @@
 
 L'écran de la partie, pour Android TV (APK installé sur le projecteur) et pour le navigateur.
 
+## Lancer sur Apple TV
+
+`npm run ios` lance toujours l'app sur un simulateur Apple TV, jamais sur un iPhone ou un iPad (`scripts/run-ios-tv.mjs`).
+
+- Il prend le simulateur Apple TV déjà démarré s'il y en a un, sinon celui qui a le tvOS le plus récent (les modèles 4K d'abord).
+- S'il n'y en a aucun, installe un runtime tvOS dans Xcode (*Settings → Components*) puis crée un simulateur Apple TV (*Window → Devices and Simulators*).
+- Les options en plus passent à `expo run:ios` : `npm run ios -- --configuration Release`.
+- Si `ios/` doit être généré, il l'est en version TV (`EXPO_TV=1`). Si `ios/` a été généré sans TV, relance `npm run prebuild:tv`.
+
 ## Version web
 
 La même app tourne dans un navigateur, sur https://trivia.julco.dev/tv : un ordinateur branché sur la télé suffit.
@@ -41,7 +50,7 @@ yarn web # Run the project on web from localhost
 ```sh
 yarn
 yarn prebuild # Executes Expo prebuild with no TV modifications
-yarn ios # Build and run for iOS
+npx expo run:ios # Build and run for iOS (`yarn ios` always targets Apple TV)
 yarn android # Build for Android mobile
 yarn web # Run the project on web from localhost
 ```
