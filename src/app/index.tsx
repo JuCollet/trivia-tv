@@ -7,11 +7,11 @@ import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
 import PlayerSlot from '@/components/PlayerSlot';
-import QrPlaceholder from '@/components/QrPlaceholder';
+import QrCode from '@/components/QrCode';
 import Screen from '@/components/Screen';
 import RulesCarousel from '@/components/RulesCarousel';
 import SettingsDialog, { languageLabel } from '@/components/SettingsDialog';
-import { JOIN_URL } from '@/api/client';
+import { JOIN_URL, joinLink } from '@/api/client';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useGame } from '@/game/GameProvider';
 import { estimateGameMinutes, MAX_PLAYERS, MIN_PLAYERS } from '@/game/rules';
@@ -22,6 +22,8 @@ import { colors, fonts, radius, s, spacing } from '@/theme';
 
 const BACKGROUND = require('../../assets/images/backgrounds/neutral.jpg');
 const SLOTS_PER_ROW = MAX_PLAYERS / 2;
+// Shown without the scheme, for players who type the address and the code.
+const JOIN_HOST = JOIN_URL.replace(/^https?:\/\//, '');
 
 // TV screen 1: the room is created as soon as the app opens. Players join with
 // the QR code or the room code and enter their themes in secret on their phone;
@@ -114,14 +116,14 @@ export default function TvLobby() {
           <AppText variant="display" style={styles.joinTitle}>
             <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
           </AppText>
-          <QrPlaceholder value={code} size={s(140)} style={styles.qr} />
+          <QrCode value={joinLink(code)} size={s(170)} style={styles.qr} />
           <AppText style={styles.scanText}>
-            {JOIN_URL ? t('lobby.openUrl', { url: JOIN_URL }) : t('lobby.scan')},{'\n'}
+            {t('lobby.scan')},{'\n'}
             {t('lobby.nothingToInstall')}
           </AppText>
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <AppText style={styles.dividerText}>{t('lobby.orCode')}</AppText>
+            <AppText style={styles.dividerText}>{t('lobby.orUrl', { host: JOIN_HOST })}</AppText>
             <View style={styles.dividerLine} />
           </View>
           <View style={styles.code}>
