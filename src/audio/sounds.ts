@@ -96,15 +96,17 @@ AppState.addEventListener('change', (state) => {
   else musicPlayer.pause();
 });
 
-// A few lazily created players per effect, used in turn, so a sound can be
-// replayed while the previous occurrence is still playing.
+// Up to a few players per effect, so a sound can be replayed while the
+// previous occurrence is still playing. Only the first one is created ahead of
+// time: each player is costly to create on slow Android TV devices, and the
+// extra ones are only needed when a sound overlaps itself.
 const SFX_VOICES = 3;
 const sfxPools = new Map<SfxName, { players: AudioPlayer[]; next: number }>();
 
 function sfxPool(name: SfxName) {
   let pool = sfxPools.get(name);
   if (!pool) {
-    pool = { players: Array.from({ length: SFX_VOICES }, () => createAudioPlayer(SFX[name])), next: 0 };
+    pool = { players: [createAudioPlayer(SFX[name])], next: 0 };
     sfxPools.set(name, pool);
   }
   return pool;
@@ -115,10 +117,22 @@ export function preloadSfx(...names: SfxName[]) {
   names.forEach(sfxPool);
 }
 
-export async function playSfx(name: SfxName, volume = 1) {
+function sfxVoice(name: SfxName) {
   const pool = sfxPool(name);
+  const idle = pool.players.find((player) => !player.playing);
+  if (idle) return idle;
+  if (pool.players.length < SFX_VOICES) {
+    const player = createAudioPlayer(SFX[name]);
+    pool.players.push(player);
+    return player;
+  }
   const player = pool.players[pool.next];
   pool.next = (pool.next + 1) % pool.players.length;
+  return player;
+}
+
+export async function playSfx(name: SfxName, volume = 1) {
+  const player = sfxVoice(name);
   player.volume = volume;
   // A finished player stays at the end: rewind before playing again.
   // The seek must complete first, otherwise iOS plays from the end (silence).

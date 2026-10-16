@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -12,6 +12,8 @@ import { useWebFonts } from '@/hooks/useWebFonts';
 import { colors } from '@/theme';
 import '@/i18n';
 
+preloadSfx(...UI_SFX);
+
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
   useWebFonts();
@@ -22,12 +24,6 @@ export default function RootLayout() {
   useLayoutEffect(() => {
     setFocusSoundEnabled(!showSplash);
     setPressEnabled(!showSplash);
-  }, [showSplash]);
-
-  // Interface sounds load once the splash is gone: creating their players
-  // during the intro delays its first frames on slow Android TV devices.
-  useEffect(() => {
-    if (!showSplash) preloadSfx(...UI_SFX);
   }, [showSplash]);
 
   return (
