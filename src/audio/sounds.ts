@@ -40,9 +40,31 @@ export const UI_SFX: SfxName[] = ['focus', 'click', 'option', 'start', 'disabled
 let musicPlayer: AudioPlayer | null = null;
 let currentMusic: AudioSource | null = null;
 
+// Some Android TV devices (XGIMI projectors) fail to open the MP3 decoder while
+// the splash video holds the hardware codecs. The player then stays in error
+// and play() alone does nothing: reload the track a few times until it starts.
+const MUSIC_RETRY_MS = 2000;
+const MUSIC_MAX_RETRIES = 5;
+let musicRetries = 0;
+
+function createMusicPlayer(source: AudioSource) {
+  const player = createAudioPlayer(source);
+  player.addListener('playbackStatusUpdate', (status) => {
+    if (status.playing) musicRetries = 0;
+    if (!status.error || musicRetries >= MUSIC_MAX_RETRIES) return;
+    musicRetries += 1;
+    setTimeout(() => {
+      if (!currentMusic) return;
+      player.replace(currentMusic);
+      player.play();
+    }, MUSIC_RETRY_MS);
+  });
+  return player;
+}
+
 export function playMusic(source: AudioSource, volume = 0.5) {
   if (!musicPlayer) {
-    musicPlayer = createAudioPlayer(source);
+    musicPlayer = createMusicPlayer(source);
   } else if (currentMusic !== source) {
     musicPlayer.replace(source);
   }
