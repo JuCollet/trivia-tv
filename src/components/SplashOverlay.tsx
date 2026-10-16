@@ -20,7 +20,9 @@ const LOGO_RATIO = 1672 / 941;
 // Share of the screen width at the start; grown by up to 1.12, it stays under half.
 const LOGO_WIDTH = 0.42;
 // Gives up on the video if it never shows a frame (decoding error, slow device).
-const FIRST_FRAME_TIMEOUT_MS = 3000;
+// Counted from the moment the still background is on screen: on a slow device
+// (XGIMI projector) the first frames of the app take several seconds to draw.
+const FIRST_FRAME_TIMEOUT_MS = 6000;
 
 export default function SplashOverlay({ onDone }: { onDone: () => void }) {
   const [opacity] = useState(() => new Animated.Value(1));
@@ -91,9 +93,10 @@ export default function SplashOverlay({ onDone }: { onDone: () => void }) {
       const timer = setTimeout(leave, PLAY_MS);
       return () => clearTimeout(timer);
     }
+    if (!backgroundLoaded) return;
     const timer = setTimeout(leave, FIRST_FRAME_TIMEOUT_MS);
     return () => clearTimeout(timer);
-  }, [started, leave]);
+  }, [started, backgroundLoaded, leave]);
 
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.container, { opacity }]}>
