@@ -17,6 +17,7 @@
         }
       ],
       "./plugins/withSceneLifecycle",
+      "./plugins/withoutSystemClickSound",
       [
         "expo-splash-screen",
         {
