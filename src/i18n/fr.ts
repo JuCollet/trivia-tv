@@ -93,12 +93,8 @@ const fr = {
       title: 'Détail des points',
       correct: 'bonne réponse',
       speed: 'rapidité',
-      wrong: 'mauvaise réponse, rapidité perdue',
+      wrong: 'mauvaise réponse, moitié de la rapidité perdue',
       noAnswer: 'pas de réponse',
-      masterFinders: 'maître : {{count}} × {{each}}',
-      masterNobody: 'maître : personne n’a trouvé',
-      masterWrong: 'maître : mauvaise réponse',
-      masterNoAnswer: 'maître : pas de réponse',
       steals: 'volés à {{name}}',
       stolen: 'volés par {{name}}',
     },
@@ -141,11 +137,11 @@ const fr = {
     },
     answers: {
       title: 'Répondre vite, un pari',
-      text: "Tout le monde répond sur son téléphone. Une bonne réponse vaut 500 points, plus jusqu'à 500 points de rapidité. Une mauvaise réponse fait perdre ce bonus : répondre trop vite, c'est risqué.",
+      text: "Tout le monde répond sur son téléphone. Une bonne réponse vaut 500 points, plus jusqu'à 500 points de rapidité. Une mauvaise réponse ne fait perdre que la moitié de ce bonus : dans le doute, tente ta chance !",
     },
     master: {
       title: 'Le maître de la manche',
-      text: "Celui qui a choisi le thème répond aussi, sans marquer ses propres points : s'il trouve, il gagne 150 points par joueur qui a aussi trouvé. Un thème que tout le monde connaît rapporte gros ! Et gare à lui : à chaque question, le plus rapide à bien répondre avant lui lui vole aussitôt 200 points !",
+      text: "Celui qui a choisi le thème joue et marque ses points comme tout le monde. Mais gare à lui : à chaque question, le plus rapide à bien répondre avant lui lui vole aussitôt 200 points !",
     },
     final: {
       title: 'La question finale mystère',

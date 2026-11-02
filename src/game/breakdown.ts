@@ -1,5 +1,5 @@
 import type { TvView } from '@jucollet/trivia-client/schema';
-import { MASTER_POINTS_PER_FINDER, STEAL_POINTS_PER_QUESTION } from './rules';
+import { STEAL_POINTS_PER_QUESTION } from './rules';
 
 export type ScoreLine = NonNullable<TvView['result']>['scores'][number];
 
@@ -8,10 +8,6 @@ export type PointsPartKind =
   | 'speed'
   | 'wrong'
   | 'noAnswer'
-  | 'masterFinders'
-  | 'masterNobody'
-  | 'masterWrong'
-  | 'masterNoAnswer'
   | 'steals'
   | 'stolen';
 
@@ -20,8 +16,6 @@ export type PointsPartKind =
 export type PointsPart = {
   kind: PointsPartKind;
   points: number;
-  // masterFinders: how many challengers found the answer.
-  count?: number;
   // steals and stolen: the other player of the steal.
   otherId?: string;
 };
@@ -41,7 +35,11 @@ export function breakdown(scores: ScoreLine[], masterId: string | null | undefin
 
   return scores
     .map((line) => {
-      const parts = line === master ? masterParts(line, challengers, stealer) : challengerParts(line);
+      // The master scores their own answer like everyone, minus a steal.
+      const parts = answerParts(line);
+      if (master && line === master && stealer) {
+        parts.push({ kind: 'stolen', points: -STEAL_POINTS_PER_QUESTION, otherId: stealer.playerId });
+      }
       if (master && line === stealer) {
         parts.push({ kind: 'steals', points: STEAL_POINTS_PER_QUESTION, otherId: master.playerId });
       }
@@ -50,27 +48,12 @@ export function breakdown(scores: ScoreLine[], masterId: string | null | undefin
     .sort((a, b) => b.line.points - a.line.points);
 }
 
-function challengerParts(line: ScoreLine): PointsPart[] {
+// A wrong answer's speedBonus is what it lost (half the bonus).
+function answerParts(line: ScoreLine): PointsPart[] {
   if (line.choice === null) return [{ kind: 'noAnswer', points: 0 }];
   if (!line.correct) return [{ kind: 'wrong', points: -line.speedBonus }];
   const parts: PointsPart[] = [{ kind: 'correct', points: line.basePoints }];
   if (line.speedBonus > 0) parts.push({ kind: 'speed', points: line.speedBonus });
-  return parts;
-}
-
-// The master doesn't score their own answer: when right, they get the
-// 150 points per challenger who found it. A steal is then taken from them.
-function masterParts(line: ScoreLine, challengers: ScoreLine[], stealer: ScoreLine | null): PointsPart[] {
-  const finders = challengers.filter((c) => c.correct).length;
-  const parts: PointsPart[] =
-    line.choice === null
-      ? [{ kind: 'masterNoAnswer', points: 0 }]
-      : !line.correct
-        ? [{ kind: 'masterWrong', points: 0 }]
-        : finders > 0
-          ? [{ kind: 'masterFinders', points: finders * MASTER_POINTS_PER_FINDER, count: finders }]
-          : [{ kind: 'masterNobody', points: 0 }];
-  if (stealer) parts.push({ kind: 'stolen', points: -STEAL_POINTS_PER_QUESTION, otherId: stealer.playerId });
   return parts;
 }
 

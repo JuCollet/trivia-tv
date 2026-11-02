@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import AppText from './AppText';
 import type { PointsBreakdownLine, PointsPart } from '@/game/breakdown';
-import { MASTER_POINTS_PER_FINDER } from '@/game/rules';
 import { colors, fonts, spacing } from '@/theme';
 
 type Props = {
@@ -17,8 +16,6 @@ export default function PointsBreakdown({ lines, nameOf }: Props) {
 
   const label = (part: PointsPart) =>
     t(`results.breakdown.${part.kind}`, {
-      count: part.count,
-      each: MASTER_POINTS_PER_FINDER,
       name: part.otherId ? nameOf(part.otherId) : '',
     });
 
