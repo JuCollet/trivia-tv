@@ -1,26 +1,26 @@
-# Chacun son truc : écran TV
+# Chacun Son Truc: TV screen
 
-L'écran de la partie, pour Android TV (APK installé sur le projecteur) et pour le navigateur.
+The game screen, for Android TV (APK installed on the projector) and for the browser.
 
-## Lancer sur Apple TV
+## Running on Apple TV
 
-`npm run ios` lance toujours l'app sur un simulateur Apple TV, jamais sur un iPhone ou un iPad (`scripts/run-ios-tv.mjs`).
+`npm run ios` always runs the app on an Apple TV simulator, never on an iPhone or iPad (`scripts/run-ios-tv.mjs`).
 
-- Il prend le simulateur Apple TV déjà démarré s'il y en a un, sinon celui qui a le tvOS le plus récent (les modèles 4K d'abord).
-- S'il n'y en a aucun, installe un runtime tvOS dans Xcode (*Settings → Components*) puis crée un simulateur Apple TV (*Window → Devices and Simulators*).
-- Les options en plus passent à `expo run:ios` : `npm run ios -- --configuration Release`.
-- Si `ios/` doit être généré, il l'est en version TV (`EXPO_TV=1`). Si `ios/` a été généré sans TV, relance `npm run prebuild:tv`.
+- It picks the Apple TV simulator that is already booted if there is one, otherwise the one with the latest tvOS (4K models first).
+- If there is none, install a tvOS runtime in Xcode (*Settings → Components*) then create an Apple TV simulator (*Window → Devices and Simulators*).
+- Extra options are passed to `expo run:ios`: `npm run ios -- --configuration Release`.
+- If `ios/` has to be generated, it is generated for TV (`EXPO_TV=1`). If `ios/` was generated without TV, run `npm run prebuild:tv` again.
 
-## Version web
+## Web version
 
-La même app tourne dans un navigateur, sur https://trivia.julco.dev/tv : un ordinateur branché sur la télé suffit.
+The same app runs in a browser, at https://trivia.julco.dev/tv: a computer plugged into the TV is enough.
 
-- `npm run build:web` produit `dist/`, servi sous `/tv` (`experiments.baseUrl` dans `app.json`).
-- La CI le publie sur Cloudflare Pages (projet `trivia-tv`) à chaque push sur `master`, et trivia-client relaie `/tv` vers ce projet.
-- Les fichiers `*.web.ts(x)` remplacent leur version TV dans le navigateur : le clavier remplace la télécommande (flèches, Entrée, Échap pour le menu), l'intro attend un clic (un navigateur ne joue pas de son avant), les polices sont chargées au démarrage.
-- Variables du dépôt (*Settings → Secrets and variables → Actions*) : `API_URL`, `JOIN_URL`, `CLOUDFLARE_ACCOUNT_ID` (variables), `CLOUDFLARE_API_TOKEN` (secret, permission *Cloudflare Pages: Edit*).
+- `npm run build:web` produces `dist/`, served under `/tv` (`experiments.baseUrl` in `app.json`).
+- CI publishes it to Cloudflare Pages (project `trivia-tv`) on every push to `master`, and trivia-client proxies `/tv` to that project.
+- The `*.web.ts(x)` files replace their TV version in the browser: the keyboard replaces the remote (arrows, Enter, Escape for the menu), the intro waits for a click (a browser won't play sound before one), and fonts are loaded at startup.
+- Repository variables (*Settings → Secrets and variables → Actions*): `API_URL`, `JOIN_URL`, `CLOUDFLARE_ACCOUNT_ID` (variables), `CLOUDFLARE_API_TOKEN` (secret, permission *Cloudflare Pages: Edit*).
 
-## Modèle Expo d'origine
+## Original Expo template
 
 This is an Expo project that can be built for Apple TV and Android TV targets, and also supports mobile and web platforms.
 
