@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 
 export const MUSIC = {
   lobby: require('../../assets/audio/lobby.mp3'),
+  question: require('../../assets/audio/question.mp3'),
 } as const;
 
 export const SFX = {

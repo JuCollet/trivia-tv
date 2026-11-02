@@ -1,11 +1,13 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { MUSIC } from '@/audio/sounds';
 import AnswerTile from '@/components/AnswerTile';
 import AppText from '@/components/AppText';
 import Countdown from '@/components/Countdown';
 import LoadingScreen from '@/components/LoadingScreen';
 import Screen from '@/components/Screen';
 import { useGame } from '@/game/GameProvider';
+import { useBackgroundMusic } from '@/hooks/useBackgroundMusic';
 import { s, spacing } from '@/theme';
 
 // TV screen 4: question, 4 colored choices, timer and number of answers received.
@@ -15,6 +17,9 @@ import { s, spacing } from '@/theme';
 export default function TvQuestion() {
   const { t } = useTranslation();
   const { view } = useGame();
+  // Loops during reading and answering, stops when the results screen takes over.
+  // Kept low so the clicks and the tick-tock stay audible over it.
+  useBackgroundMusic(MUSIC.question, 0.25);
   const question = view?.question;
   const round = view?.round;
   if (!view || !question || !round) return <LoadingScreen />;
