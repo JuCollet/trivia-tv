@@ -22,7 +22,7 @@ function withSceneManifest(config) {
 function withSceneAppDelegate(config) {
   return withAppDelegate(config, (cfg) => {
     if (cfg.modResults.language !== 'swift') {
-      throw new Error('withSceneLifecycle: AppDelegate Swift attendu');
+      throw new Error('withSceneLifecycle: expected a Swift AppDelegate');
     }
     let src = cfg.modResults.contents;
 
@@ -41,7 +41,7 @@ function withSceneAppDelegate(config) {
     );
 
     if (!src.includes('ExpoReactNativeFactoryProvider') || src.includes('UIWindow(frame:')) {
-      throw new Error("withSceneLifecycle: AppDelegate inattendu, patch non appliqué");
+      throw new Error('withSceneLifecycle: unexpected AppDelegate, patch not applied');
     }
     cfg.modResults.contents = src;
     return cfg;
