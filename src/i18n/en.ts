@@ -93,12 +93,8 @@ const en: Resources = {
       title: 'Points breakdown',
       correct: 'correct answer',
       speed: 'speed',
-      wrong: 'wrong answer, speed lost',
+      wrong: 'wrong answer, half the speed lost',
       noAnswer: 'no answer',
-      masterFinders: 'master: {{count}} × {{each}}',
-      masterNobody: 'master: nobody got it',
-      masterWrong: 'master: wrong answer',
-      masterNoAnswer: 'master: no answer',
       steals: 'stolen from {{name}}',
       stolen: 'stolen by {{name}}',
     },
@@ -141,11 +137,11 @@ const en: Resources = {
     },
     answers: {
       title: 'Answering fast is a gamble',
-      text: 'Everyone answers on their phone. A correct answer is worth 500 points, plus up to 500 for speed. A wrong answer loses that bonus: answering too fast is risky.',
+      text: 'Everyone answers on their phone. A correct answer is worth 500 points, plus up to 500 for speed. A wrong answer only loses half of that bonus: when in doubt, take a guess!',
     },
     master: {
       title: 'The theme master',
-      text: "Whoever picked the theme answers too, but doesn't score their own points: if they get it right, they get 150 points for each player who also got it. A theme everyone knows pays off! And watch out: on each question, the fastest correct answer ahead of them steals 200 of their points right away!",
+      text: "Whoever picked the theme plays and scores like everyone else. But watch out: on each question, the fastest correct answer ahead of them steals 200 of their points right away!",
     },
     final: {
       title: 'The mystery final question',
