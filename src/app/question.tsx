@@ -6,10 +6,12 @@ import Countdown from '@/components/Countdown';
 import LoadingScreen from '@/components/LoadingScreen';
 import Screen from '@/components/Screen';
 import { useGame } from '@/game/GameProvider';
-import { spacing } from '@/theme';
+import { s, spacing } from '@/theme';
 
 // TV screen 4: question, 4 colored choices, timer and number of answers received.
-// The server closes the question when the timer ends or everyone has answered.
+// The server first sends the question alone, without its choices, so that everyone reads it. When the reading time
+// is over, it sends the choices and the timer starts. It closes the question when the timer ends or everyone has
+// answered.
 export default function TvQuestion() {
   const { t } = useTranslation();
   const { view } = useGame();
@@ -18,6 +20,8 @@ export default function TvQuestion() {
   if (!view || !question || !round) return <LoadingScreen />;
 
   const playerCount = view.players.filter((p) => p.connected).length;
+  // No choice during the reading time (`answersOpen` is false on the server)
+  const reading = question.choices.length === 0;
 
   return (
     <Screen>
@@ -28,7 +32,11 @@ export default function TvQuestion() {
             ? t('question.multiplier', { multiplier: question.multiplier })
             : t('question.progress', { number: question.number, total: question.total })}
         </AppText>
-        <Countdown key={question.sequence} endsAt={question.endsAt} />
+        {reading ? (
+          <View style={styles.countdownPlaceholder} />
+        ) : (
+          <Countdown key={question.sequence} endsAt={question.endsAt} maxSeconds={question.timerSeconds} />
+        )}
         <AppText muted>
           {t('question.answered', { count: question.answeredCount, total: playerCount })}
         </AppText>
@@ -44,14 +52,21 @@ export default function TvQuestion() {
         {question.text}
       </AppText>
 
+      {reading ? (
+        <AppText muted style={styles.reading}>
+          {t('question.reading')}
+        </AppText>
+      ) : null}
+
+      {/* Empty tiles while reading, so that nothing moves when the choices appear */}
       <View style={styles.grid}>
         <View style={styles.gridRow}>
-          <AnswerTile index={0} label={question.choices[0]} />
-          <AnswerTile index={1} label={question.choices[1]} />
+          <AnswerTile index={0} label={question.choices[0] ?? ''} dimmed={reading} />
+          <AnswerTile index={1} label={question.choices[1] ?? ''} dimmed={reading} />
         </View>
         <View style={styles.gridRow}>
-          <AnswerTile index={2} label={question.choices[2]} />
-          <AnswerTile index={3} label={question.choices[3]} />
+          <AnswerTile index={2} label={question.choices[2] ?? ''} dimmed={reading} />
+          <AnswerTile index={3} label={question.choices[3] ?? ''} dimmed={reading} />
         </View>
       </View>
     </Screen>
@@ -71,6 +86,15 @@ const styles = StyleSheet.create({
   question: {
     textAlign: 'center',
     marginVertical: spacing.lg,
+  },
+  reading: {
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  // Same size as the countdown circle, to keep the header in place when the timer appears
+  countdownPlaceholder: {
+    width: s(72),
+    height: s(72),
   },
   grid: {
     flex: 1,

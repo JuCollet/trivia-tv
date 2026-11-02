@@ -80,6 +80,7 @@ const en: Resources = {
     progress: 'Question {{number}}/{{total}}',
     answered: '{{count}}/{{total}} answered',
     finalTheme: 'Theme: {{theme}}',
+    reading: 'Read the question, the answers are coming…',
   },
   results: {
     correctAnswer: 'Correct answer',
