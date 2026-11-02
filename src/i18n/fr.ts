@@ -80,6 +80,7 @@ const fr = {
     progress: 'Question {{number}}/{{total}}',
     answered: '{{count}}/{{total}} ont répondu',
     finalTheme: 'Thème : {{theme}}',
+    reading: 'Lisez bien la question, les réponses arrivent…',
   },
   results: {
     correctAnswer: 'Bonne réponse',
