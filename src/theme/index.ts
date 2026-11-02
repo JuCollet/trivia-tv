@@ -33,6 +33,12 @@ export const colors = {
   ready: '#2EE58A',
   // Dark text on the bright pills and badges.
   onBright: '#0B1260',
+  // Slot machine of the final question's announcement.
+  slotFrame: '#3A1A6E',
+  slotWindow: '#FFF8E6',
+  slotText: '#2A1458',
+  slotPointer: '#FF4FCF',
+  bulbOff: '#5A4A10',
   // Avatar colors, given out in joining order.
   players: [
     '#FFC93C',

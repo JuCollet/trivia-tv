@@ -31,6 +31,8 @@ type GameContextValue = {
   view: TvView | null;
   settings: GameSettings;
   error: string | null;
+  // Themes revealed so far in this game, shown again on the final question's slot machine.
+  playedThemes: string[];
   // Creates a new game, replacing the current one: the phones connected to
   // the current one follow it with the same name and color.
   newGame: (settings?: GameSettings) => void;
@@ -128,6 +130,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
   }, [game, createGame]);
 
+  // Kept on the TV: the server sends the theme of the current round only.
+  const [played, setPlayed] = useState<{ game: HostedGame | null; themes: string[] }>({ game: null, themes: [] });
+  const roundTheme = view?.round && !view.round.isFinal ? view.round.theme : null;
+  if (played.game !== game) {
+    setPlayed({ game, themes: [] });
+  } else if (roundTheme && !played.themes.includes(roundTheme)) {
+    setPlayed({ game, themes: [...played.themes, roundTheme] });
+  }
+
   const phase = view?.phase;
   const pathname = usePathname();
   useEffect(() => {
@@ -141,6 +152,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const value: GameContextValue = {
     view,
     settings,
+    playedThemes: played.themes,
     error: error && (error.key === 'unreachable' ? t('errors.unreachable', { url: error.url }) : t('errors.createFailed')),
     newGame: (next = settings) => {
       setRequested(next);

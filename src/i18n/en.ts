@@ -74,6 +74,10 @@ const en: Resources = {
     go: "Let's go",
     preparing: 'Claude is preparing the questions…',
   },
+  finalReveal: {
+    title: 'FINAL QUESTION',
+    searching: 'Claude is picking a mystery theme…',
+  },
   question: {
     finalMystery: 'Mystery final question',
     multiplier: 'Points ×{{multiplier}}',
