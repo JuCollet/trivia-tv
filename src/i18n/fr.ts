@@ -74,6 +74,10 @@ const fr = {
     go: "C'est parti",
     preparing: 'Claude prépare les questions…',
   },
+  finalReveal: {
+    title: 'QUESTION FINALE',
+    searching: 'Claude choisit un thème mystère…',
+  },
   question: {
     finalMystery: 'Question finale mystère',
     multiplier: 'Points ×{{multiplier}}',
