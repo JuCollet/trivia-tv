@@ -99,7 +99,6 @@ const fr = {
     },
   },
   awards: {
-    roundEnd: 'Fin de manche',
     none: 'Aucune récompense cette fois',
     continue: 'Continuer',
     next: 'Suivant',
@@ -121,6 +120,7 @@ const fr = {
     },
     bonnetDane: {
       label: "Bonnet d'âne",
+      stat: '0 bonne réponse',
       description: 'Aucune bonne réponse sur la manche : badge seul.',
     },
   },

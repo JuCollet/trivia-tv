@@ -99,7 +99,6 @@ const en: Resources = {
     },
   },
   awards: {
-    roundEnd: 'End of round',
     none: 'No awards this time',
     continue: 'Continue',
     next: 'Next',
@@ -121,6 +120,7 @@ const en: Resources = {
     },
     bonnetDane: {
       label: 'Dunce cap',
+      stat: '0 correct answers',
       description: 'No correct answers in the round: badge only.',
     },
   },
