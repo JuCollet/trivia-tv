@@ -104,23 +104,27 @@ const en: Resources = {
     next: 'Next',
     plusViteQueSonOmbre: {
       label: 'Faster than their shadow',
+      subtitle: 'The fastest correct answer, ahead of the theme master',
       description: 'The fastest correct answer, ahead of the theme master, stole 200 points from them per question, already in the ranking.',
     },
     outsider: {
       label: 'The Outsider',
+      subtitle: 'A perfect round',
       description: 'A perfect round: +200.',
     },
     seulContreTous: {
       label: 'One against all',
+      subtitle: 'The only one to find the right answer',
       description: 'The only challenger to get a question right (3 players or more): +150 per question.',
     },
     pasMonTruc: {
       label: 'Not my thing after all',
+      subtitle: 'The theme master found no answer on their own theme',
       description: 'The theme master misses every question on their own theme: −200.',
     },
     bonnetDane: {
       label: 'Dunce cap',
-      stat: '0 correct answers',
+      subtitle: 'No correct answers in the round',
       description: 'No correct answers in the round: badge only.',
     },
   },
