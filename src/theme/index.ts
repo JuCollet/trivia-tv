@@ -57,6 +57,18 @@ export const colors = {
   bulbOff: '#5A4A10',
 } as const;
 
+// Button faces, top to bottom: light at the top, the base color at 45%,
+// darker at the bottom, so the face looks domed (FocusableButton).
+// Kept sober: a slightly rounded matte surface, not glossy plastic.
+// The matte ones only shade slightly, without any shine.
+export const gradients = {
+  go: ['#49E899', '#2EE58A', '#29CE7C'],
+  round: ['#FFFFFF', '#F3F5FF', '#DADEF0'],
+  primary: ['#FFD055', '#FFC93C', '#E6B536'],
+  secondary: ['#3D46A0', '#232D93', '#1F2884'],
+  outline: ['rgba(37, 46, 135, 0.6)', 'rgba(8, 18, 110, 0.6)', 'rgba(7, 16, 99, 0.6)'],
+} as const;
+
 export const spacing = {
   xs: s(4),
   sm: s(8),
