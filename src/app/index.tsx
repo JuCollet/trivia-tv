@@ -1,7 +1,6 @@
 import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
@@ -22,21 +21,43 @@ import { colors, fonts, radius, s, spacing } from '@/theme';
 
 const BACKGROUND = require('../../assets/images/backgrounds/neutral.jpg');
 const SLOTS_PER_ROW = MAX_PLAYERS / 2;
-const SEAT_SIZE = s(88);
+const SEAT_SIZE = s(92);
 // Shown without the scheme, for players who type the address and the code.
 const JOIN_HOST = JOIN_URL.replace(/^https?:\/\//, '');
+
+type DayPart = 'morning' | 'afternoon' | 'evening';
+
+// "Who's playing tonight?" follows the TV's clock: morning before noon,
+// afternoon until 6 pm, evening after.
+function dayPart(date: Date): DayPart {
+  const hour = date.getHours();
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 18) return 'afternoon';
+  return 'evening';
+}
+
+function useDayPart(): DayPart {
+  const [part, setPart] = useState(() => dayPart(new Date()));
+  useEffect(() => {
+    const timer = setInterval(() => setPart(dayPart(new Date())), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  return part;
+}
 
 // TV screen 1: the room is created as soon as the app opens. Players join with
 // the QR code or the room code and enter their themes in secret on their phone;
 // the host tweaks the settings and starts the game with the remote.
+// Left: who is playing. Right: how to join, the settings and the rules.
 export default function TvLobby() {
   useBackgroundMusic(MUSIC.lobby, 0.4);
   const { t } = useTranslation();
   const game = useGame();
+  const part = useDayPart();
   const [draft, setDraft] = useState<GameSettings>(game.settings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  // The chips follow the dialog while it is open.
+  // The settings summary follows the dialog while it is open.
   const settings = settingsOpen ? draft : game.settings;
   // Picking a language in the settings switches the interface right away.
   useEffect(() => setLanguage(settings.language), [settings.language]);
@@ -60,7 +81,6 @@ export default function TvLobby() {
     connected: p.connected,
   }));
   const minutes = estimateGameMinutes(settings, players.length);
-  const readyCount = players.filter((p) => p.ready).length;
   // Spec: start stays greyed out until every theme is entered.
   const canStart = game.view.canStart;
   // Settings change live, even after players entered their themes: the server
@@ -82,45 +102,65 @@ export default function TvLobby() {
   return (
     <Screen background={BACKGROUND} style={styles.screen}>
       <View style={styles.left}>
-        <View style={styles.chips}>
-          <Chip icon="timer-outline" accent>
-            {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
-          </Chip>
-          <Chip icon="list">
-            {t('lobby.rounds', { count: settings.rounds })} • {t('lobby.questions', { count: settings.questionsPerTheme })}{' '}
-            • {t('common.seconds', { count: settings.timerSeconds })}
-          </Chip>
-          <Chip icon="globe-outline">{languageLabel(settings.language)}</Chip>
-        </View>
-
-        <View style={styles.heading}>
-          <AppText variant="hero" style={styles.title}>
-            {t('lobby.titleStart')}
-            <Text style={styles.titleHighlight}>{t('lobby.titleHighlight')}</Text>
-          </AppText>
-          <AppText style={styles.subtitle}>
-            {t('lobby.players', { count: players.length })} •{' '}
-            {t('lobby.playerRange', { min: MIN_PLAYERS, max: MAX_PLAYERS })}
-          </AppText>
-        </View>
+        <AppText variant="hero" style={styles.title}>
+          {t('lobby.titleStart')}
+          <Text style={styles.titleHighlight}>{t(`lobby.title_${part}`)}</Text>
+        </AppText>
 
         <PlayerGrid players={players} />
 
-        <View style={styles.info}>
-          <Ionicons name="information-circle" size={s(18)} color={colors.highlight} />
-          <AppText style={styles.infoText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-            {lobbyInfo(t, players.length, readyCount)}
+        <Legend players={players} />
+
+        <FocusableButton
+          label={t('lobby.launch')}
+          icon="play"
+          variant="launch"
+          onPress={game.start}
+          disabled={!canStart}
+          sound="start"
+          hasTVPreferredFocus={canStart}
+          style={styles.launchButton}
+          labelStyle={styles.launchLabel}
+        />
+      </View>
+
+      <View style={styles.sidebar}>
+        <View style={styles.join}>
+          <AppText variant="display" style={styles.joinTitle}>
+            <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
           </AppText>
+          <QrCode value={joinLink(code)} size={s(118)} style={styles.qr} />
+          <AppText style={styles.scanText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            {t('lobby.orUrl', { host: JOIN_HOST })}
+          </AppText>
+          <View style={styles.code}>
+            <AppText variant="hero" style={styles.codeText}>
+              {code}
+            </AppText>
+          </View>
         </View>
 
-        <View style={styles.actions}>
+        <View style={styles.divider} />
+
+        <View style={styles.infos}>
+          <Info icon="timer-outline" accent>
+            {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
+          </Info>
+          <Info icon="list">
+            {t('lobby.rounds', { count: settings.rounds })} • {t('lobby.questions', { count: settings.questionsPerTheme })}{' '}
+            • {t('common.seconds', { count: settings.timerSeconds })}
+          </Info>
+          <Info icon="globe-outline">{languageLabel(settings.language)}</Info>
+        </View>
+
+        <View style={styles.sideActions}>
           <FocusableButton
             label={t('lobby.rules')}
             icon="book"
             variant="outline"
             onPress={() => setRulesOpen(true)}
-            style={styles.settingsButton}
-            labelStyle={styles.settingsLabel}
+            style={styles.sideButton}
+            labelStyle={styles.sideLabel}
           />
           <FocusableButton
             label={t('lobby.settings')}
@@ -128,41 +168,9 @@ export default function TvLobby() {
             variant="outline"
             onPress={openSettings}
             hasTVPreferredFocus={!canStart}
-            style={styles.settingsButton}
-            labelStyle={styles.settingsLabel}
+            style={styles.sideButton}
+            labelStyle={styles.sideLabel}
           />
-          <FocusableButton
-            label={t('lobby.launch')}
-            icon="play"
-            variant="launch"
-            onPress={game.start}
-            disabled={!canStart}
-            sound="start"
-            hasTVPreferredFocus={canStart}
-            style={styles.launchButton}
-            labelStyle={styles.launchLabel}
-          />
-        </View>
-      </View>
-
-      <View style={styles.joinPanel}>
-        <AppText variant="display" style={styles.joinTitle}>
-          <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
-        </AppText>
-        <QrCode value={joinLink(code)} size={s(160)} style={styles.qr} />
-        <AppText style={styles.scanText}>
-          {t('lobby.scan')},{'\n'}
-          {t('lobby.nothingToInstall')}
-        </AppText>
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <AppText style={styles.dividerText}>{t('lobby.orUrl', { host: JOIN_HOST })}</AppText>
-          <View style={styles.dividerLine} />
-        </View>
-        <View style={styles.code}>
-          <AppText variant="hero" style={styles.codeText}>
-            {code}
-          </AppText>
         </View>
       </View>
 
@@ -179,7 +187,7 @@ export default function TvLobby() {
   );
 }
 
-function Chip({
+function Info({
   icon,
   accent,
   children,
@@ -190,9 +198,11 @@ function Chip({
 }) {
   const color = accent ? colors.accent : colors.text;
   return (
-    <View style={styles.chip}>
-      <Ionicons name={icon} size={s(16)} color={color} />
-      <AppText style={[styles.chipText, { color }]}>{children}</AppText>
+    <View style={styles.infoRow}>
+      <Ionicons name={icon} size={s(15)} color={color} />
+      <AppText style={[styles.infoText, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        {children}
+      </AppText>
     </View>
   );
 }
@@ -222,54 +232,47 @@ function PlayerGrid({ players }: { players: LobbyPlayer[] }) {
   );
 }
 
-function lobbyInfo(t: TFunction, playerCount: number, readyCount: number): string {
-  const missing = MIN_PLAYERS - playerCount;
-  if (missing > 0) return t('lobby.missingPlayers', { count: missing });
-  if (readyCount === playerCount) return t('lobby.allThemesReady');
-  return t('lobby.themesReady', { count: readyCount, total: playerCount });
+// Explains the ring colors, only those on screen, and what is still missing to start.
+function Legend({ players }: { players: LobbyPlayer[] }) {
+  const { t } = useTranslation();
+  const missing = MIN_PLAYERS - players.length;
+  const anyWaiting = players.some((p) => !p.ready);
+  const anyReady = players.some((p) => p.ready);
+  return (
+    <View style={styles.legend}>
+      {anyWaiting ? <LegendItem color={colors.notReady} label={t('lobby.legendWaiting')} /> : null}
+      {anyReady ? <LegendItem color={colors.ready} label={t('lobby.legendReady')} /> : null}
+      {missing > 0 ? (
+        <AppText style={styles.legendText}>{t('lobby.missingPlayers', { count: missing })}</AppText>
+      ) : null}
+    </View>
+  );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <View style={styles.legendItem}>
+      <View style={[styles.legendDot, { borderColor: color }]} />
+      <AppText style={styles.legendText}>{label}</AppText>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  chips: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: s(5),
-    borderRadius: s(20),
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
-    backgroundColor: colors.panel,
-  },
-  chipText: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: s(14),
-  },
   screen: {
     flexDirection: 'row',
     gap: spacing.lg,
   },
   left: {
     flex: 1,
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
-  heading: {
-    alignItems: 'center',
-  },
   title: {
-    fontSize: s(36),
-    lineHeight: s(42),
+    fontSize: s(40),
+    lineHeight: s(48),
   },
   titleHighlight: {
-    color: colors.highlight,
-  },
-  subtitle: {
-    fontFamily: fonts.bodySemiBold,
     color: colors.highlight,
   },
   grid: {
@@ -280,31 +283,51 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: s(20),
   },
-  info: {
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    columnGap: spacing.lg,
+    rowGap: spacing.xs,
+    minHeight: s(20),
+  },
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: s(20),
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
-    backgroundColor: colors.panel,
   },
-  infoText: {
-    flex: 1,
-    fontSize: s(13),
+  legendDot: {
+    width: s(14),
+    height: s(14),
+    borderRadius: s(7),
+    borderWidth: s(3),
+    backgroundColor: colors.seat,
   },
-  joinPanel: {
-    width: s(220),
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  legendText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: s(14),
+    color: colors.highlight,
+  },
+  launchButton: {
+    width: s(320),
+  },
+  launchLabel: {
+    fontSize: s(26),
+  },
+  sidebar: {
+    width: s(230),
+    gap: spacing.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.md,
     borderRadius: radius.lg,
     borderWidth: s(1.5),
     borderColor: colors.panelBorder,
     backgroundColor: colors.panel,
+  },
+  join: {
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   joinTitle: {
     fontSize: s(22),
@@ -314,64 +337,59 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   qr: {
-    borderWidth: s(5),
+    borderWidth: s(4),
     borderColor: colors.accent,
   },
   scanText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: s(14),
+    fontSize: s(12),
     color: colors.highlight,
     textAlign: 'center',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    alignSelf: 'stretch',
-  },
-  dividerLine: {
-    flex: 1,
-    height: s(1),
-    backgroundColor: colors.panelBorder,
-  },
-  dividerText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: s(13),
-    color: colors.highlight,
   },
   code: {
     alignSelf: 'stretch',
     alignItems: 'center',
-    marginHorizontal: spacing.md,
-    borderRadius: s(28),
+    marginHorizontal: spacing.lg,
+    borderRadius: s(24),
     borderWidth: s(1.5),
     borderColor: colors.panelBorder,
     backgroundColor: colors.background,
   },
   codeText: {
-    fontSize: s(36),
+    fontSize: s(28),
     letterSpacing: s(3),
   },
-  actions: {
-    flexDirection: 'row',
+  divider: {
+    height: s(1),
+    backgroundColor: colors.panelBorder,
+  },
+  infos: {
+    flex: 1,
     justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  infoRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
+    gap: spacing.sm,
   },
-  settingsButton: {
-    width: s(140),
-    paddingVertical: spacing.md,
-    borderRadius: radius.lg,
-  },
-  settingsLabel: {
+  infoText: {
+    flex: 1,
     fontFamily: fonts.bodySemiBold,
-    fontSize: s(18),
+    fontSize: s(13),
+  },
+  sideActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  sideButton: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+  },
+  sideLabel: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: s(14),
     color: colors.highlight,
-  },
-  launchButton: {
-    width: s(240),
-  },
-  launchLabel: {
-    fontSize: s(34),
   },
 });
