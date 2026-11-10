@@ -20,7 +20,7 @@ export default function Screen({ children, centered, style, background }: Props)
 
   if (!background) return content;
   return (
-    <ImageBackground source={background} resizeMode="cover" style={styles.safe}>
+    <ImageBackground source={background} resizeMode="cover" style={styles.safe} imageStyle={styles.image}>
       {content}
     </ImageBackground>
   );
@@ -30,6 +30,12 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  // Without an explicit size, react-native-web draws the image at its own
+  // size, leaving the edges uncovered on screens larger than the picture.
+  image: {
+    width: '100%',
+    height: '100%',
   },
   transparent: {
     backgroundColor: 'transparent',

@@ -34,6 +34,8 @@ export const colors = {
   // Lobby seats: dark navy circle, ringed in orange until the player is ready.
   seat: '#070C4A',
   notReady: '#FF9A1F',
+  // Lobby sidebar, edge to edge over the background.
+  sidebar: 'rgba(7, 12, 74, 0.5)',
   // Dark text on the bright pills and badges.
   onBright: '#0B1260',
   // Slot machine of the final question's announcement.
