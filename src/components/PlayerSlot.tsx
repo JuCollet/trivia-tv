@@ -17,8 +17,8 @@ export type LobbyPlayer = {
 type Props = { size: number } & ({ player: LobbyPlayer } | { player?: undefined; hint?: boolean });
 
 // Lobby seat: a round avatar with the player's name, or a free seat at half
-// opacity. The ring is orange while the player still types their themes, and
-// the avatar sits on green once they are ready.
+// opacity. The avatar always sits on dark navy: its ring is orange while the
+// player still types their themes, and turns green once they are ready.
 export default function PlayerSlot(props: Props) {
   const { t } = useTranslation();
   const { size } = props;
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     borderColor: colors.notReady,
   },
   ready: {
-    backgroundColor: colors.ready,
+    backgroundColor: colors.seat,
     borderColor: colors.ready,
   },
   avatar: {
