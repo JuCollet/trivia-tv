@@ -1,6 +1,6 @@
 // Draws assets/images/awards/rays.png, the sunburst behind the avatar on the awards screen:
 // white wedges on transparent, with a radial fade (opaque at the centre, transparent at the edge).
-// Usage (macOS): swift scripts/make-rays.swift assets/images/awards/rays.png 768 16
+// Usage (macOS): swift scripts/make-rays.swift assets/images/awards/rays.png 768 12
 import AppKit
 
 let a = CommandLine.arguments

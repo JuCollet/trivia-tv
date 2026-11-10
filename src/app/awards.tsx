@@ -57,35 +57,45 @@ export default function TvAwards() {
 
   const next = () => (isLast ? advance() : setIndex((i) => i + 1));
 
-  // One column: who, their avatar, what it's worth, which award. No page count:
-  // the screen just moves on from one award to the next.
+  // One column: who, their avatar, what it's worth, which award, and the button
+  // at the bottom. The avatar leads; the points, in gold like the button, come
+  // second; the award reads as a badge. No page count: the screen just moves on
+  // from one award to the next.
   return (
-    <Screen centered>
-      {award ? (
-        <View key={index} style={styles.column}>
-          <AppText variant="hero" style={styles.centered} numberOfLines={1}>
-            {playerName(view, award.playerId)}
-          </AppText>
-          <AwardAvatar avatar={view.players.find((p) => p.id === award.playerId)?.avatar} mood={AWARD_MOOD[award.id]} />
-          {award.points !== 0 ? (
-            <AppText variant="hero" style={award.points > 0 ? styles.gain : styles.loss}>
-              {award.points > 0 ? `+${award.points}` : award.points}
+    <Screen>
+      <View style={styles.page}>
+        {award ? (
+          <View key={index} style={styles.column}>
+            <AppText variant="display" style={styles.centered} numberOfLines={1}>
+              {playerName(view, award.playerId)}
             </AppText>
-          ) : award.id === 'bonnetDane' ? (
-            // The only award worth no points: show what earned it instead.
-            <AppText variant="hero" style={styles.loss}>
-              {t('awards.bonnetDane.stat')}
-            </AppText>
-          ) : null}
-          <AppText variant="display" style={styles.centered}>
-            {t(`awards.${award.id}.label`)}
-          </AppText>
-        </View>
-      ) : (
-        <AppText variant="display">{t('awards.none')}</AppText>
-      )}
+            <AwardAvatar avatar={view.players.find((p) => p.id === award.playerId)?.avatar} mood={AWARD_MOOD[award.id]} />
+            <View style={styles.result}>
+              {award.points !== 0 ? (
+                <AppText variant="hero" style={award.points > 0 ? styles.gain : styles.loss}>
+                  {award.points > 0 ? `+${award.points}` : award.points}
+                </AppText>
+              ) : award.id === 'bonnetDane' ? (
+                // The only award worth no points: show what earned it instead.
+                <AppText variant="hero" style={styles.loss}>
+                  {t('awards.bonnetDane.stat')}
+                </AppText>
+              ) : null}
+              <View style={styles.badge}>
+                <AppText variant="title" style={styles.centered}>
+                  {t(`awards.${award.id}.label`)}
+                </AppText>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.column}>
+            <AppText variant="display">{t('awards.none')}</AppText>
+          </View>
+        )}
 
-      <FocusableButton label={isLast ? t('awards.continue') : t('awards.next')} onPress={next} hasTVPreferredFocus />
+        <FocusableButton label={isLast ? t('awards.continue') : t('awards.next')} onPress={next} hasTVPreferredFocus />
+      </View>
     </Screen>
   );
 }
@@ -122,12 +132,33 @@ function AwardAvatar({ avatar, mood }: { avatar?: string; mood: Mood }) {
 }
 
 const AVATAR_SIZE = s(200);
-const STAGE_SIZE = s(210);
+const STAGE_SIZE = s(200);
 
 const styles = StyleSheet.create({
-  column: {
+  page: {
+    flex: 1,
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
+  },
+  // Fills the space above the button and centres the award in it.
+  column: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  // Points and award name read as one block.
+  result: {
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  badge: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+    borderRadius: s(999),
+    borderWidth: s(2),
+    borderColor: colors.panelBorder,
+    backgroundColor: colors.panel,
   },
   // Drawn first among the column's children, so the rays spread behind the texts.
   stage: {
@@ -141,15 +172,16 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    borderWidth: s(5),
+    borderWidth: s(4),
     borderColor: colors.text,
     backgroundColor: colors.seat,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  // Gold like the button, rather than green, so the screen keeps two accent colours.
   gain: {
-    color: colors.success,
+    color: colors.accent,
   },
   loss: {
     color: colors.danger,
