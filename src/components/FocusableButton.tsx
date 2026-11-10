@@ -1,11 +1,13 @@
 import { useEffect, useId, useState, type ComponentProps, type Ref } from 'react';
-import { Pressable, StyleSheet, type TextStyle, type View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import { playSfx, type SfxName } from '@/audio/sounds';
 import { colors, radius, s, spacing } from '@/theme';
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'launch';
+// 'round': a white disc showing only the icon (the label is read by
+// accessibility), with a translucent ring around it on focus.
+type Variant = 'primary' | 'secondary' | 'outline' | 'launch' | 'round';
 
 type Props = {
   label: string;
@@ -93,28 +95,36 @@ export default function FocusableButton({
       }}
       onBlur={() => setFocused(false)}
       hasTVPreferredFocus={hasTVPreferredFocus}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.base,
         styles[variant],
-        focused && styles.focused,
+        focused && (variant === 'round' ? styles.roundFocused : styles.focused),
         (pressed || disabled) && styles.dimmed,
         style,
       ]}
     >
-      {icon ? (
-        <Ionicons
-          name={icon}
-          size={textStyle.fontSize}
-          color={textStyle.color as string}
-        />
+      {variant === 'round' ? (
+        <View style={styles.roundFace}>
+          {icon ? <Ionicons name={icon} size={ROUND_ICON_SIZE} color={colors.background} /> : null}
+        </View>
+      ) : icon ? (
+        <Ionicons name={icon} size={textStyle.fontSize} color={textStyle.color as string} />
       ) : null}
-      <AppText variant="title" style={textStyle}>
-        {label}
-      </AppText>
+      {variant === 'round' ? null : (
+        <AppText variant="title" style={textStyle}>
+          {label}
+        </AppText>
+      )}
     </Pressable>
   );
 }
+
+export const ROUND_SIZE = s(64);
+export const ROUND_RING = s(5);
+const ROUND_ICON_SIZE = s(30);
 
 const styles = StyleSheet.create({
   base: {
@@ -149,6 +159,26 @@ const styles = StyleSheet.create({
     borderBottomWidth: s(5),
     borderRadius: radius.lg,
   },
+  // The disc plus the room for its focus ring: place it by the ring's outer edge.
+  round: {
+    width: ROUND_SIZE + 2 * ROUND_RING,
+    height: ROUND_SIZE + 2 * ROUND_RING,
+    padding: ROUND_RING,
+    borderWidth: 0,
+    borderRadius: ROUND_SIZE,
+  },
+  roundFace: {
+    width: ROUND_SIZE,
+    height: ROUND_SIZE,
+    borderRadius: ROUND_SIZE / 2,
+    backgroundColor: colors.text,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roundFocused: {
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    transform: [{ scale: 1.06 }],
+  },
   focused: {
     borderColor: colors.focus,
     transform: [{ scale: 1.06 }],
@@ -163,4 +193,5 @@ const LABEL_STYLES = StyleSheet.create({
   secondary: {},
   outline: {},
   launch: {},
+  round: {},
 });

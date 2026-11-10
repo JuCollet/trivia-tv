@@ -99,28 +99,32 @@ const fr = {
     },
   },
   awards: {
-    roundEnd: 'Fin de manche',
     none: 'Aucune récompense cette fois',
     continue: 'Continuer',
     next: 'Suivant',
     plusViteQueSonOmbre: {
       label: 'Plus vite que son ombre',
+      subtitle: 'Le plus rapide à bien répondre, devant le maître',
       description: 'Le plus rapide à bien répondre, devant le maître : il lui a volé 200 points par question, déjà comptés au classement.',
     },
     outsider: {
       label: "L'Outsider",
+      subtitle: 'Sans-faute sur toute la manche',
       description: 'Sans-faute sur la manche : +200.',
     },
     seulContreTous: {
       label: 'Seul contre tous',
+      subtitle: 'Seul à trouver la bonne réponse',
       description: 'Seul challenger à trouver une question (dès 3 joueurs) : +150 par question.',
     },
     pasMonTruc: {
       label: 'Finalement pas mon truc',
+      subtitle: "Le maître n'a trouvé aucune réponse sur son propre thème",
       description: 'Le maître ne trouve aucune réponse sur son propre thème : −200.',
     },
     bonnetDane: {
       label: "Bonnet d'âne",
+      subtitle: 'Aucune bonne réponse sur la manche',
       description: 'Aucune bonne réponse sur la manche : badge seul.',
     },
   },
