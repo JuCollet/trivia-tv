@@ -2,8 +2,9 @@ import { useEffect, useId, useState, type ComponentProps, type Ref } from 'react
 import { Pressable, StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
+import ButtonFace from './ButtonFace';
 import { playSfx, type SfxName } from '@/audio/sounds';
-import { colors, fonts, radius, s, spacing } from '@/theme';
+import { colors, fonts, gradients, radius, s, spacing } from '@/theme';
 
 // 'round': a white disc showing only the icon (the label is read by
 // accessibility), with a translucent ring around it on focus.
@@ -133,13 +134,32 @@ export default function FocusableButton({
       ]}
     >
       {variant === 'round' ? (
-        <View style={styles.roundFace}>
+        <ButtonFace colors={gradients.round} domed borderRadius={ROUND_SIZE / 2} style={styles.roundFace}>
           {icon ? <Ionicons name={icon} size={ROUND_ICON_SIZE} color={colors.background} /> : null}
-        </View>
+        </ButtonFace>
       ) : variant === 'go' ? (
-        <View style={[styles.goFace, disabled && styles.goFaceDisabled]}>{content}</View>
-      ) : (
+        disabled ? (
+          <View style={[styles.goFace, styles.goFaceDisabled]}>{content}</View>
+        ) : (
+          <ButtonFace colors={gradients.go} domed borderRadius={GO_HEIGHT / 2} style={styles.goFace}>
+            {content}
+          </ButtonFace>
+        )
+      ) : variant === 'footer' ? (
         content
+      ) : (
+        <>
+          <ButtonFace
+            colors={gradients[variant]}
+            domed={variant === 'primary'}
+            // Under the transparent border too, as the flat fill was; inside
+            // it once the border shows (focus, outline).
+            {...(focused || variant === 'outline'
+              ? { borderRadius: radius.md - BORDER, style: styles.backdropInside }
+              : { borderRadius: radius.md, style: styles.backdropUnderBorder })}
+          />
+          {content}
+        </>
       )}
     </Pressable>
   );
@@ -149,6 +169,7 @@ export const ROUND_SIZE = s(64);
 export const ROUND_RING = s(5);
 const ROUND_ICON_SIZE = s(30);
 const GO_HEIGHT = s(56);
+const BORDER = s(3);
 // Room around the go button's face for its focus ring.
 export const GO_RING = s(5);
 
@@ -157,7 +178,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.md,
-    borderWidth: s(3),
+    borderWidth: BORDER,
     borderColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
@@ -168,15 +189,21 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: s(20),
   },
-  primary: {
-    backgroundColor: colors.accent,
-  },
-  secondary: {
-    backgroundColor: colors.surfaceRaised,
-  },
+  primary: {},
+  secondary: {},
   outline: {
-    backgroundColor: colors.panel,
     borderColor: colors.panelBorder,
+  },
+  // The face drawn behind the label of the rectangular buttons.
+  backdropUnderBorder: {
+    position: 'absolute',
+    top: -BORDER,
+    left: -BORDER,
+    right: -BORDER,
+    bottom: -BORDER,
+  },
+  backdropInside: {
+    ...StyleSheet.absoluteFill,
   },
   // The ring around the face: invisible until focused.
   go: {
@@ -187,17 +214,18 @@ const styles = StyleSheet.create({
   },
   goFace: {
     height: GO_HEIGHT,
-    paddingLeft: s(18),
-    paddingRight: s(22),
-    borderRadius: GO_HEIGHT / 2,
-    borderWidth: s(2),
-    borderColor: colors.ready,
-    backgroundColor: colors.ready,
+    paddingLeft: s(20),
+    paddingRight: s(24),
     flexDirection: 'row',
     alignItems: 'center',
     gap: s(10),
   },
+  // Translucent grey instead of the gradient: no shine, no shadow.
   goFaceDisabled: {
+    paddingLeft: s(18),
+    paddingRight: s(22),
+    borderRadius: GO_HEIGHT / 2,
+    borderWidth: s(2),
     borderColor: colors.disabledBorder,
     backgroundColor: colors.disabledFill,
   },
@@ -223,8 +251,6 @@ const styles = StyleSheet.create({
   roundFace: {
     width: ROUND_SIZE,
     height: ROUND_SIZE,
-    borderRadius: ROUND_SIZE / 2,
-    backgroundColor: colors.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
