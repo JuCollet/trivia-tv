@@ -249,7 +249,7 @@ function Legend({ players }: { players: LobbyPlayer[] }) {
 function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { borderColor: color }]} />
+      <View style={[styles.legendDot, { backgroundColor: color }]} />
       <AppText style={styles.legendText}>{label}</AppText>
     </View>
   );
@@ -300,11 +300,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   legendDot: {
-    width: s(14),
-    height: s(14),
-    borderRadius: s(7),
-    borderWidth: s(3),
-    backgroundColor: colors.seat,
+    width: s(10),
+    height: s(10),
+    borderRadius: s(5),
   },
   legendText: {
     fontFamily: fonts.bodySemiBold,
@@ -318,10 +316,10 @@ const styles = StyleSheet.create({
     fontSize: s(26),
   },
   sidebar: {
-    width: s(250),
+    width: s(290),
     gap: spacing.md,
-    paddingLeft: spacing.lg,
-    paddingRight: safeArea.horizontal,
+    // Symmetric, so the content is centered; the right side still clears overscan.
+    paddingHorizontal: safeArea.horizontal,
     paddingVertical: safeArea.vertical,
     backgroundColor: colors.sidebar,
   },
@@ -359,8 +357,10 @@ const styles = StyleSheet.create({
     fontSize: s(26),
     letterSpacing: s(3),
   },
+  // The rows stay left-aligned with each other, as a block centered in the sidebar.
   infos: {
     flex: 1,
+    alignSelf: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
   },
@@ -370,7 +370,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   infoText: {
-    flex: 1,
     fontFamily: fonts.bodySemiBold,
     fontSize: s(15),
   },
