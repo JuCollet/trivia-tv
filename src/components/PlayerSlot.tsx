@@ -1,8 +1,10 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
+import AvatarMedia from './AvatarMedia';
 import { avatarSource } from '@/game/avatars';
+import { avatarVideo } from '@/game/avatarVideos';
 import { colors, fonts, s, spacing } from '@/theme';
 
 export type LobbyPlayer = {
@@ -39,11 +41,12 @@ export default function PlayerSlot(props: Props) {
 
   const { player } = props;
   const source = avatarSource(player.avatar);
+  const video = avatarVideo(player.avatar, 'neutral');
   return (
     <View style={[styles.slot, { width: size }, !player.connected && styles.disconnected]}>
       <View style={[styles.circle, circle, player.ready ? styles.ready : styles.waiting]}>
-        {source ? (
-          <Image source={source} style={styles.avatar} resizeMode="contain" />
+        {source || video ? (
+          <AvatarMedia still={source} video={video} />
         ) : (
           <AppText variant="display" style={{ fontSize: size / 2.4 }}>
             {player.name.charAt(0).toUpperCase()}
@@ -80,10 +83,6 @@ const styles = StyleSheet.create({
   ready: {
     backgroundColor: colors.seat,
     borderColor: colors.ready,
-  },
-  avatar: {
-    width: '92%',
-    height: '92%',
   },
   // Lighter than a free seat's 50%, so the player still reads as there.
   disconnected: {

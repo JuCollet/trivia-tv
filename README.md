@@ -20,6 +20,19 @@ The same app runs in a browser, at https://trivia.julco.dev/tv: a computer plugg
 - The `*.web.ts(x)` files replace their TV version in the browser: the keyboard replaces the remote (arrows, Enter, Escape for the menu), the intro waits for a click (a browser won't play sound before one), and fonts are loaded at startup.
 - Repository variables (*Settings → Secrets and variables → Actions*): `API_URL`, `JOIN_URL`, `CLOUDFLARE_ACCOUNT_ID` (variables), `CLOUDFLARE_API_TOKEN` (secret, permission *Cloudflare Pages: Edit*).
 
+## Animated avatars
+
+Each avatar has a still image (`assets/images/avatars/aNN.webp`) and can have animated variants: `neutral` (lobby seat), `happy` (positive awards) and `sad` (negative awards, sad or angry). The app shows a variant when it exists, otherwise the still image.
+
+The variants are made in the trivia-assets repository (`avatars/<name>/`, see `avatars/PROMPTS.md` there), then copied into the app:
+
+```bash
+npm run sync:avatars                       # trivia-assets next to this repository
+npm run sync:avatars -- ~/dev/trivia-assets
+```
+
+It copies them to `assets/videos/avatars/<id>/<emotion>.mp4` (ids from `avatars/avatars.json`) and regenerates `src/game/avatarVideos.ts`. Commit both, then rebuild the app: the videos are bundled.
+
 ## Original Expo template
 
 This is an Expo project that can be built for Apple TV and Android TV targets, and also supports mobile and web platforms.
