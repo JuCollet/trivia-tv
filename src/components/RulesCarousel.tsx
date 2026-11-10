@@ -149,8 +149,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.xl,
     borderRadius: radius.lg,
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
     backgroundColor: colors.background,
   },
   header: {

@@ -122,7 +122,8 @@ export default function FocusableButton({
       hasTVPreferredFocus={hasTVPreferredFocus}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled }}
+      // No accessibilityState.disabled: on Android it disables the native view,
+      // which then cannot take focus and the D-pad skips over it.
       style={({ pressed }) => [
         styles.base,
         styles[variant],
