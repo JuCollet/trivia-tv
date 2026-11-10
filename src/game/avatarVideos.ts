@@ -8,6 +8,10 @@ import type { VideoSource } from 'expo-video';
 export type AvatarEmotion = 'neutral' | 'happy' | 'sad';
 
 const VIDEOS: Record<string, Partial<Record<AvatarEmotion, VideoSource>>> = {
+  a01: {
+    happy: require('../../assets/videos/avatars/a01/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a01/sad.mp4'),
+  },
   a02: {
     neutral: require('../../assets/videos/avatars/a02/neutral.mp4'),
     happy: require('../../assets/videos/avatars/a02/happy.mp4'),
