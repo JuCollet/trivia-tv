@@ -17,7 +17,7 @@ import { estimateGameMinutes, MAX_PLAYERS, MIN_PLAYERS } from '@/game/rules';
 import type { GameSettings } from '@/game/types';
 import { useBackgroundMusic } from '@/hooks/useBackgroundMusic';
 import { setLanguage } from '@/i18n';
-import { colors, fonts, radius, s, spacing } from '@/theme';
+import { colors, fonts, radius, s, safeArea, spacing } from '@/theme';
 
 const BACKGROUND = require('../../assets/images/backgrounds/neutral.jpg');
 const SLOTS_PER_ROW = MAX_PLAYERS / 2;
@@ -129,7 +129,7 @@ export default function TvLobby() {
           <AppText variant="display" style={styles.joinTitle}>
             <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
           </AppText>
-          <QrCode value={joinLink(code)} size={s(118)} style={styles.qr} />
+          <QrCode value={joinLink(code)} size={s(124)} style={styles.qr} />
           <AppText style={styles.scanText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
             {t('lobby.orUrl', { host: JOIN_HOST })}
           </AppText>
@@ -140,16 +140,13 @@ export default function TvLobby() {
           </View>
         </View>
 
-        <View style={styles.divider} />
-
         <View style={styles.infos}>
           <Info icon="timer-outline" accent>
             {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
           </Info>
-          <Info icon="list">
-            {t('lobby.rounds', { count: settings.rounds })} • {t('lobby.questions', { count: settings.questionsPerTheme })}{' '}
-            • {t('common.seconds', { count: settings.timerSeconds })}
-          </Info>
+          <Info icon="layers-outline">{t('lobby.rounds', { count: settings.rounds })}</Info>
+          <Info icon="help-circle-outline">{t('lobby.questions', { count: settings.questionsPerTheme })}</Info>
+          <Info icon="stopwatch-outline">{t('lobby.timer', { count: settings.timerSeconds })}</Info>
           <Info icon="globe-outline">{languageLabel(settings.language)}</Info>
         </View>
 
@@ -199,7 +196,7 @@ function Info({
   const color = accent ? colors.accent : colors.text;
   return (
     <View style={styles.infoRow}>
-      <Ionicons name={icon} size={s(15)} color={color} />
+      <Ionicons name={icon} size={s(17)} color={color} />
       <AppText style={[styles.infoText, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
         {children}
       </AppText>
@@ -259,12 +256,17 @@ function LegendItem({ color, label }: { color: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
+  // The sidebar runs the full height and to the right edge: the screen only
+  // keeps the safe area on the left, and each side pads itself.
   screen: {
     flexDirection: 'row',
     gap: spacing.lg,
+    paddingRight: 0,
+    paddingVertical: 0,
   },
   left: {
     flex: 1,
+    paddingVertical: safeArea.vertical,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -316,14 +318,12 @@ const styles = StyleSheet.create({
     fontSize: s(26),
   },
   sidebar: {
-    width: s(230),
+    width: s(250),
     gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: radius.lg,
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
-    backgroundColor: colors.panel,
+    paddingLeft: spacing.lg,
+    paddingRight: safeArea.horizontal,
+    paddingVertical: safeArea.vertical,
+    backgroundColor: colors.sidebar,
   },
   join: {
     alignItems: 'center',
@@ -356,12 +356,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   codeText: {
-    fontSize: s(28),
+    fontSize: s(26),
     letterSpacing: s(3),
-  },
-  divider: {
-    height: s(1),
-    backgroundColor: colors.panelBorder,
   },
   infos: {
     flex: 1,
@@ -376,20 +372,18 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontFamily: fonts.bodySemiBold,
-    fontSize: s(13),
+    fontSize: s(15),
   },
   sideActions: {
-    flexDirection: 'row',
     gap: spacing.sm,
   },
   sideButton: {
-    flex: 1,
-    paddingVertical: spacing.sm,
+    paddingVertical: s(6),
     borderRadius: radius.md,
   },
   sideLabel: {
     fontFamily: fonts.bodySemiBold,
-    fontSize: s(14),
+    fontSize: s(16),
     color: colors.highlight,
   },
 });
