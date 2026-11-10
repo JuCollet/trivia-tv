@@ -28,14 +28,25 @@ export const colors = {
   panel: 'rgba(8, 18, 110, 0.6)',
   panelBorder: 'rgba(90, 140, 255, 0.55)',
   highlight: '#7CC6FF',
-  launch: '#F0203F',
-  launchEdge: '#A80F2A',
   ready: '#2EE58A',
-  // Lobby seats: dark navy circle, ringed in orange until the player is ready.
+  // Lobby seats: the avatar always sits on dark navy.
   seat: '#070C4A',
-  notReady: '#FF9A1F',
-  // Lobby sidebar, edge to edge over the background.
-  sidebar: 'rgba(7, 12, 74, 0.5)',
+  seatHint: 'rgba(7, 12, 74, 0.7)',
+  freeSeat: 'rgba(124, 198, 255, 0.35)',
+  freeSeatFill: 'rgba(7, 12, 74, 0.4)',
+  // Focus ring around a white or green button, and its disabled look.
+  focusRing: 'rgba(255, 255, 255, 0.35)',
+  disabledFill: 'rgba(255, 255, 255, 0.12)',
+  disabledBorder: 'rgba(255, 255, 255, 0.18)',
+  disabledText: 'rgba(255, 255, 255, 0.4)',
+  // Lobby sidebar: a rounded card over the background, its info chips and
+  // the Rules / Settings footer.
+  card: 'rgba(7, 12, 74, 0.72)',
+  cardBorder: 'rgba(90, 140, 255, 0.35)',
+  chip: 'rgba(24, 33, 122, 0.9)',
+  chipAccent: 'rgba(255, 201, 60, 0.15)',
+  cardFooter: 'rgba(35, 45, 147, 0.55)',
+  cardFooterFocused: '#3A47C4',
   // Dark text on the bright pills and badges.
   onBright: '#0B1260',
   // Slot machine of the final question's announcement.

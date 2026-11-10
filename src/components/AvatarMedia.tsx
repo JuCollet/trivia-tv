@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEventListener } from 'expo';
-import { Image, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Image, StyleSheet, View, type DimensionValue, type ImageSourcePropType } from 'react-native';
 import { useVideoPlayer, VideoView, type VideoSource } from 'expo-video';
 
 // Delays in ms as [min, max]: each wait is picked at random in the range, so
@@ -14,14 +14,17 @@ type Props = {
   still?: ImageSourcePropType;
   video?: VideoSource;
   delays?: Delays;
+  // Share of the parent circle the avatar fills.
+  size?: DimensionValue;
 };
 
 // An avatar inside its round seat: the animated variant when there is one,
-// otherwise the still image. Fills 92% of the parent circle, which clips it.
-export default function AvatarMedia({ still, video, delays = IDLE_DELAYS }: Props) {
-  if (video) return <AvatarVideo source={video} still={still} delays={delays} />;
+// otherwise the still image. Fills 92% of the parent circle by default, which clips it.
+export default function AvatarMedia({ still, video, delays = IDLE_DELAYS, size = '92%' }: Props) {
+  const box = { width: size, height: size };
+  if (video) return <AvatarVideo source={video} still={still} delays={delays} box={box} />;
   if (!still) return null;
-  return <Image source={still} style={styles.media} resizeMode="contain" fadeDuration={0} />;
+  return <Image source={still} style={box} resizeMode="contain" fadeDuration={0} />;
 }
 
 function randomBetween([min, max]: [number, number]) {
@@ -32,7 +35,17 @@ function randomBetween([min, max]: [number, number]) {
 // the clips loop seamlessly) for a random pause before it plays again. A constant
 // loop would make the screen too busy. The still image stays underneath until
 // the first frame renders, so the seat never flashes black.
-function AvatarVideo({ source, still, delays }: { source: VideoSource; still?: ImageSourcePropType; delays: Delays }) {
+function AvatarVideo({
+  source,
+  still,
+  delays,
+  box,
+}: {
+  source: VideoSource;
+  still?: ImageSourcePropType;
+  delays: Delays;
+  box: { width: DimensionValue; height: DimensionValue };
+}) {
   const player = useVideoPlayer(source, (p) => {
     p.loop = false;
     p.muted = true;
@@ -56,7 +69,7 @@ function AvatarVideo({ source, still, delays }: { source: VideoSource; still?: I
 
   const [started, setStarted] = useState(false);
   return (
-    <View style={styles.media}>
+    <View style={box}>
       {still ? <Image source={still} style={styles.fill} resizeMode="contain" fadeDuration={0} /> : null}
       <VideoView
         player={player}
@@ -74,11 +87,6 @@ function AvatarVideo({ source, still, delays }: { source: VideoSource; still?: I
 }
 
 const styles = StyleSheet.create({
-  // Same box for the still and the video: the clips are framed like the still.
-  media: {
-    width: '92%',
-    height: '92%',
-  },
   // Explicit size: with absoluteFill alone, media renders at its intrinsic size on Android TV.
   fill: {
     ...StyleSheet.absoluteFill,
