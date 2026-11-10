@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
 import FocusableButton from '@/components/FocusableButton';
-import PlayerSlot from '@/components/PlayerSlot';
+import PlayerSlot, { type LobbyPlayer } from '@/components/PlayerSlot';
 import QrCode from '@/components/QrCode';
 import Screen from '@/components/Screen';
 import RulesCarousel from '@/components/RulesCarousel';
@@ -15,13 +15,14 @@ import { JOIN_URL, joinLink } from '@/api/client';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useGame } from '@/game/GameProvider';
 import { estimateGameMinutes, MAX_PLAYERS, MIN_PLAYERS } from '@/game/rules';
-import type { GameSettings, Player } from '@/game/types';
+import type { GameSettings } from '@/game/types';
 import { useBackgroundMusic } from '@/hooks/useBackgroundMusic';
 import { setLanguage } from '@/i18n';
 import { colors, fonts, radius, s, spacing } from '@/theme';
 
 const BACKGROUND = require('../../assets/images/backgrounds/neutral.jpg');
 const SLOTS_PER_ROW = MAX_PLAYERS / 2;
+const SEAT_SIZE = s(88);
 // Shown without the scheme, for players who type the address and the code.
 const JOIN_HOST = JOIN_URL.replace(/^https?:\/\//, '');
 
@@ -51,15 +52,15 @@ export default function TvLobby() {
   }
 
   const { code } = game.view;
-  const players: Player[] = game.view.players.map((p) => ({
+  const players: LobbyPlayer[] = game.view.players.map((p) => ({
     id: p.id,
     name: p.name,
-    score: p.score,
-    themesEntered: p.themeCount,
+    avatar: p.avatar,
+    ready: p.themesReady,
+    connected: p.connected,
   }));
   const minutes = estimateGameMinutes(settings, players.length);
-  const colorsById = new Map(game.view.players.map((p) => [p.id, p.color]));
-  const readyCount = game.view.players.filter((p) => p.themesReady).length;
+  const readyCount = players.filter((p) => p.ready).length;
   // Spec: start stays greyed out until every theme is entered.
   const canStart = game.view.canStart;
   // Settings change live, even after players entered their themes: the server
@@ -79,90 +80,90 @@ export default function TvLobby() {
   };
 
   return (
-    <Screen background={BACKGROUND}>
-      <View style={styles.chips}>
-        <Chip icon="timer-outline" accent>
-          {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
-        </Chip>
-        <Chip icon="list">
-          {t('lobby.rounds', { count: settings.rounds })} • {t('lobby.questions', { count: settings.questionsPerTheme })}{' '}
-          • {t('common.seconds', { count: settings.timerSeconds })}
-        </Chip>
-        <Chip icon="globe-outline">{languageLabel(settings.language)}</Chip>
-      </View>
-
-      <View style={styles.main}>
-        <View style={[styles.panel, styles.playersPanel]}>
-          <View>
-            <AppText variant="hero" style={styles.title}>
-              {t('lobby.titleStart')}
-              <Text style={styles.titleHighlight}>{t('lobby.titleHighlight')}</Text>
-            </AppText>
-            <AppText style={styles.subtitle}>
-              {t('lobby.players', { count: players.length })} •{' '}
-              {t('lobby.playerRange', { min: MIN_PLAYERS, max: MAX_PLAYERS })}
-            </AppText>
-          </View>
-          <PlayerGrid players={players} colorsById={colorsById} themesNeeded={settings.rounds} />
-          <View style={styles.info}>
-            <Ionicons name="information-circle" size={s(18)} color={colors.highlight} />
-            <AppText style={styles.infoText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-              {lobbyInfo(t, players, readyCount)}
-            </AppText>
-          </View>
+    <Screen background={BACKGROUND} style={styles.screen}>
+      <View style={styles.left}>
+        <View style={styles.chips}>
+          <Chip icon="timer-outline" accent>
+            {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
+          </Chip>
+          <Chip icon="list">
+            {t('lobby.rounds', { count: settings.rounds })} • {t('lobby.questions', { count: settings.questionsPerTheme })}{' '}
+            • {t('common.seconds', { count: settings.timerSeconds })}
+          </Chip>
+          <Chip icon="globe-outline">{languageLabel(settings.language)}</Chip>
         </View>
 
-        <View style={[styles.panel, styles.joinPanel]}>
-          <AppText variant="display" style={styles.joinTitle}>
-            <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
+        <View style={styles.heading}>
+          <AppText variant="hero" style={styles.title}>
+            {t('lobby.titleStart')}
+            <Text style={styles.titleHighlight}>{t('lobby.titleHighlight')}</Text>
           </AppText>
-          <QrCode value={joinLink(code)} size={s(170)} style={styles.qr} />
-          <AppText style={styles.scanText}>
-            {t('lobby.scan')},{'\n'}
-            {t('lobby.nothingToInstall')}
+          <AppText style={styles.subtitle}>
+            {t('lobby.players', { count: players.length })} •{' '}
+            {t('lobby.playerRange', { min: MIN_PLAYERS, max: MAX_PLAYERS })}
           </AppText>
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <AppText style={styles.dividerText}>{t('lobby.orUrl', { host: JOIN_HOST })}</AppText>
-            <View style={styles.dividerLine} />
-          </View>
-          <View style={styles.code}>
-            <AppText variant="hero" style={styles.codeText}>
-              {code}
-            </AppText>
-          </View>
+        </View>
+
+        <PlayerGrid players={players} />
+
+        <View style={styles.info}>
+          <Ionicons name="information-circle" size={s(18)} color={colors.highlight} />
+          <AppText style={styles.infoText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+            {lobbyInfo(t, players.length, readyCount)}
+          </AppText>
+        </View>
+
+        <View style={styles.actions}>
+          <FocusableButton
+            label={t('lobby.rules')}
+            icon="book"
+            variant="outline"
+            onPress={() => setRulesOpen(true)}
+            style={styles.settingsButton}
+            labelStyle={styles.settingsLabel}
+          />
+          <FocusableButton
+            label={t('lobby.settings')}
+            icon="settings-sharp"
+            variant="outline"
+            onPress={openSettings}
+            hasTVPreferredFocus={!canStart}
+            style={styles.settingsButton}
+            labelStyle={styles.settingsLabel}
+          />
+          <FocusableButton
+            label={t('lobby.launch')}
+            icon="play"
+            variant="launch"
+            onPress={game.start}
+            disabled={!canStart}
+            sound="start"
+            hasTVPreferredFocus={canStart}
+            style={styles.launchButton}
+            labelStyle={styles.launchLabel}
+          />
         </View>
       </View>
 
-      <View style={styles.actions}>
-        <FocusableButton
-          label={t('lobby.rules')}
-          icon="book"
-          variant="outline"
-          onPress={() => setRulesOpen(true)}
-          style={styles.settingsButton}
-          labelStyle={styles.settingsLabel}
-        />
-        <FocusableButton
-          label={t('lobby.settings')}
-          icon="settings-sharp"
-          variant="outline"
-          onPress={openSettings}
-          hasTVPreferredFocus={!canStart}
-          style={styles.settingsButton}
-          labelStyle={styles.settingsLabel}
-        />
-        <FocusableButton
-          label={t('lobby.launch')}
-          icon="play"
-          variant="launch"
-          onPress={game.start}
-          disabled={!canStart}
-          sound="start"
-          hasTVPreferredFocus={canStart}
-          style={styles.launchButton}
-          labelStyle={styles.launchLabel}
-        />
+      <View style={styles.joinPanel}>
+        <AppText variant="display" style={styles.joinTitle}>
+          <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
+        </AppText>
+        <QrCode value={joinLink(code)} size={s(160)} style={styles.qr} />
+        <AppText style={styles.scanText}>
+          {t('lobby.scan')},{'\n'}
+          {t('lobby.nothingToInstall')}
+        </AppText>
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <AppText style={styles.dividerText}>{t('lobby.orUrl', { host: JOIN_HOST })}</AppText>
+          <View style={styles.dividerLine} />
+        </View>
+        <View style={styles.code}>
+          <AppText variant="hero" style={styles.codeText}>
+            {code}
+          </AppText>
+        </View>
       </View>
 
       <RulesCarousel visible={rulesOpen} onClose={() => setRulesOpen(false)} />
@@ -196,40 +197,23 @@ function Chip({
   );
 }
 
-// Every seat of the room: joined players first, then free seats.
-function PlayerGrid({
-  players,
-  colorsById,
-  themesNeeded,
-}: {
-  players: Player[];
-  colorsById: Map<string, string>;
-  themesNeeded: number;
-}) {
-  // Past one row of players, the cards shrink so both rows fit the panel.
-  const compact = players.length > SLOTS_PER_ROW;
+// Every seat of the room, two rows of round avatars: joined players first,
+// then free seats.
+function PlayerGrid({ players }: { players: LobbyPlayer[] }) {
   const rows = [0, SLOTS_PER_ROW].map((start) =>
     Array.from({ length: SLOTS_PER_ROW }, (_, i) => start + i),
   );
   return (
     <View style={styles.grid}>
       {rows.map((row) => (
-        // A row of free seats only takes the height left over.
-        <View key={row[0]} style={[styles.gridRow, row[0] >= players.length && styles.freeRow]}>
+        <View key={row[0]} style={styles.gridRow}>
           {row.map((seat) => {
             const player = players[seat];
             return player ? (
-              <PlayerSlot
-                key={player.id}
-                player={player}
-                color={colorsById.get(player.id) ?? colors.players[seat % colors.players.length]}
-                isHost={false}
-                themesNeeded={themesNeeded}
-                compact={compact}
-              />
+              <PlayerSlot key={player.id} player={player} size={SEAT_SIZE} />
             ) : (
               // The first free seat invites the next player to scan the code.
-              <PlayerSlot key={seat} hint={seat === players.length} />
+              <PlayerSlot key={seat} hint={seat === players.length} size={SEAT_SIZE} />
             );
           })}
         </View>
@@ -238,11 +222,11 @@ function PlayerGrid({
   );
 }
 
-function lobbyInfo(t: TFunction, players: Player[], readyCount: number): string {
-  const missing = MIN_PLAYERS - players.length;
+function lobbyInfo(t: TFunction, playerCount: number, readyCount: number): string {
+  const missing = MIN_PLAYERS - playerCount;
   if (missing > 0) return t('lobby.missingPlayers', { count: missing });
-  if (readyCount === players.length) return t('lobby.allThemesReady');
-  return t('lobby.themesReady', { count: readyCount, total: players.length });
+  if (readyCount === playerCount) return t('lobby.allThemesReady');
+  return t('lobby.themesReady', { count: readyCount, total: playerCount });
 }
 
 const styles = StyleSheet.create({
@@ -266,22 +250,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodySemiBold,
     fontSize: s(14),
   },
-  main: {
-    flex: 1,
+  screen: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
-  panel: {
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
-    backgroundColor: colors.panel,
-  },
-  playersPanel: {
+  left: {
     flex: 1,
-    gap: spacing.sm,
-    padding: spacing.md,
+    justifyContent: 'space-between',
+  },
+  heading: {
+    alignItems: 'center',
   },
   title: {
     fontSize: s(36),
@@ -295,15 +273,12 @@ const styles = StyleSheet.create({
     color: colors.highlight,
   },
   grid: {
-    flex: 1,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   gridRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  freeRow: {
-    flex: 1,
+    justifyContent: 'center',
+    gap: s(20),
   },
   info: {
     flexDirection: 'row',
@@ -314,18 +289,26 @@ const styles = StyleSheet.create({
     borderRadius: s(20),
     borderWidth: s(1.5),
     borderColor: colors.panelBorder,
+    backgroundColor: colors.panel,
   },
   infoText: {
     flex: 1,
     fontSize: s(13),
   },
   joinPanel: {
-    width: s(270),
+    width: s(220),
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: s(1.5),
+    borderColor: colors.panelBorder,
+    backgroundColor: colors.panel,
   },
   joinTitle: {
-    fontSize: s(26),
+    fontSize: s(22),
+    textAlign: 'center',
   },
   joinHighlight: {
     color: colors.accent,
@@ -376,7 +359,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   settingsButton: {
-    width: s(170),
+    width: s(140),
     paddingVertical: spacing.md,
     borderRadius: radius.lg,
   },
@@ -386,7 +369,7 @@ const styles = StyleSheet.create({
     color: colors.highlight,
   },
   launchButton: {
-    width: s(310),
+    width: s(240),
   },
   launchLabel: {
     fontSize: s(34),
