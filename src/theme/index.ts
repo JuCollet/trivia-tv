@@ -31,6 +31,9 @@ export const colors = {
   launch: '#F0203F',
   launchEdge: '#A80F2A',
   ready: '#2EE58A',
+  // Lobby seats: dark navy circle, ringed in orange until the player is ready.
+  seat: '#070C4A',
+  notReady: '#FF9A1F',
   // Dark text on the bright pills and badges.
   onBright: '#0B1260',
   // Slot machine of the final question's announcement.
@@ -39,19 +42,6 @@ export const colors = {
   slotText: '#2A1458',
   slotPointer: '#FF4FCF',
   bulbOff: '#5A4A10',
-  // Avatar colors, given out in joining order.
-  players: [
-    '#FFC93C',
-    '#FF4FCF',
-    '#1FD3F0',
-    '#FF8A1F',
-    '#8B5CF6',
-    '#2EE58A',
-    '#FF5A5F',
-    '#3B82F6',
-    '#F472B6',
-    '#A3E635',
-  ] as const,
 } as const;
 
 export const spacing = {

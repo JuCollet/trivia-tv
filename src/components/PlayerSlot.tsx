@@ -1,137 +1,100 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
-import type { Player } from '@/game/types';
-import { colors, fonts, radius, s, spacing } from '@/theme';
+import { avatarSource } from '@/game/avatars';
+import { colors, fonts, s, spacing } from '@/theme';
 
-type Props =
-  | {
-      player: Player;
-      color: string;
-      isHost: boolean;
-      // Themes each player has to enter: one per round.
-      themesNeeded: number;
-      // Smaller avatar when the room fills both rows.
-      compact?: boolean;
-    }
-  | { player?: undefined; hint?: boolean };
+export type LobbyPlayer = {
+  id: string;
+  name: string;
+  avatar: string;
+  // One theme entered per round.
+  ready: boolean;
+  connected: boolean;
+};
 
-// Lobby grid cell: a joined player with their theme status, or a free seat.
+type Props = { size: number } & ({ player: LobbyPlayer } | { player?: undefined; hint?: boolean });
+
+// Lobby seat: a round avatar with the player's name, or a free seat at half
+// opacity. The avatar always sits on dark navy: its ring is orange while the
+// player still types their themes, and turns green once they are ready.
 export default function PlayerSlot(props: Props) {
   const { t } = useTranslation();
+  const { size } = props;
+  const circle = { width: size, height: size, borderRadius: size / 2 };
+
   if (!props.player) {
     return (
-      <View style={[styles.slot, styles.empty]}>
-        {props.hint ? (
-          <>
-            <Ionicons name="phone-portrait-outline" size={s(22)} color={colors.highlight} />
-            <AppText style={styles.hint}>{t('slot.scan')}</AppText>
-          </>
-        ) : null}
+      <View style={[styles.slot, { width: size }]}>
+        <View style={[styles.circle, styles.empty, circle]}>
+          {props.hint ? <Ionicons name="phone-portrait-outline" size={s(26)} color={colors.text} /> : null}
+        </View>
+        <AppText style={[styles.name, styles.hint]} numberOfLines={1}>
+          {props.hint ? t('slot.scan') : ' '}
+        </AppText>
       </View>
     );
   }
 
-  const { player, color, isHost, themesNeeded, compact } = props;
-  const avatarSize = compact ? s(34) : s(50);
-  const entered = Math.min(player.themesEntered, themesNeeded);
-  const ready = entered >= themesNeeded;
-
+  const { player } = props;
+  const source = avatarSource(player.avatar);
   return (
-    <View style={[styles.slot, styles.filled, compact && styles.filledCompact]}>
-      <View>
-        <View
-          style={[
-            styles.avatar,
-            { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2, backgroundColor: color },
-          ]}
-        >
-          <AppText variant="display" style={[styles.initial, { fontSize: avatarSize / 2 }]}>
+    <View style={[styles.slot, { width: size }, !player.connected && styles.disconnected]}>
+      <View style={[styles.circle, circle, player.ready ? styles.ready : styles.waiting]}>
+        {source ? (
+          <Image source={source} style={styles.avatar} resizeMode="contain" />
+        ) : (
+          <AppText variant="display" style={{ fontSize: size / 2.4 }}>
             {player.name.charAt(0).toUpperCase()}
           </AppText>
-        </View>
-        {isHost ? (
-          <View style={styles.hostBadge}>
-            <AppText style={styles.hostText}>{t('slot.host')}</AppText>
-          </View>
-        ) : null}
+        )}
       </View>
-      <AppText style={styles.name} numberOfLines={1}>
+      <AppText style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
         {player.name}
       </AppText>
-      <View style={[styles.pill, { backgroundColor: ready ? colors.ready : colors.accent }]}>
-        <Ionicons name={ready ? 'checkmark' : 'pencil'} size={s(11)} color={colors.onBright} />
-        <AppText style={styles.pillText}>{ready ? t('slot.ready') : t('slot.themes', { entered, needed: themesNeeded })}</AppText>
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   slot: {
-    flex: 1,
-    borderRadius: radius.md,
-    borderWidth: s(1.5),
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  circle: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  filled: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
-    gap: spacing.xs,
-    backgroundColor: colors.panel,
-    borderColor: colors.panelBorder,
-  },
-  filledCompact: {
-    paddingVertical: spacing.xs,
-    gap: s(2),
+    overflow: 'hidden',
+    borderWidth: s(5),
   },
   empty: {
-    minHeight: s(40),
-    gap: spacing.xs,
-    borderStyle: 'dashed',
-    borderColor: colors.panelBorder,
+    backgroundColor: colors.seat,
+    borderColor: 'transparent',
+    opacity: 0.5,
   },
-  hint: {
-    fontFamily: fonts.bodySemiBold,
-    color: colors.highlight,
+  waiting: {
+    backgroundColor: colors.seat,
+    borderColor: colors.notReady,
+  },
+  ready: {
+    backgroundColor: colors.seat,
+    borderColor: colors.ready,
   },
   avatar: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: '92%',
+    height: '92%',
   },
-  initial: {
-    color: colors.onBright,
-  },
-  hostBadge: {
-    position: 'absolute',
-    top: -s(6),
-    right: -s(22),
-    paddingHorizontal: s(5),
-    borderRadius: radius.sm,
-    backgroundColor: colors.accent,
-  },
-  hostText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: s(10),
-    color: colors.onBright,
+  // Lighter than a free seat's 50%, so the player still reads as there.
+  disconnected: {
+    opacity: 0.7,
   },
   name: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: s(16),
-  },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(3),
-    paddingHorizontal: spacing.sm,
-    paddingVertical: s(2),
-    borderRadius: s(12),
-  },
-  pillText: {
     fontFamily: fonts.bodyBold,
-    fontSize: s(11),
-    color: colors.onBright,
+    fontSize: s(20),
+    maxWidth: '120%',
+  },
+  hint: {
+    color: colors.highlight,
   },
 });

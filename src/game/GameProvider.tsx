@@ -34,7 +34,7 @@ type GameContextValue = {
   // Themes revealed so far in this game, shown again on the final question's slot machine.
   playedThemes: string[];
   // Creates a new game, replacing the current one: the phones connected to
-  // the current one follow it with the same name and color.
+  // the current one follow it with the same name and avatar.
   newGame: (settings?: GameSettings) => void;
   // Changes the settings in the lobby, even after players entered their themes.
   changeSettings: (settings: GameSettings) => void;
