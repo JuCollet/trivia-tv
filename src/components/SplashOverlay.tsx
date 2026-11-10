@@ -19,8 +19,11 @@ const LOGO_POP_MS = 900;
 const LOGO_RATIO = 1672 / 941;
 // Share of the screen width at the start; grown by up to 1.12, it stays under half.
 const LOGO_WIDTH = 0.42;
-// Gives up on the video if it never shows a frame (decoding error, slow device).
-const FIRST_FRAME_TIMEOUT_MS = 3000;
+// Gives up on the video if it never shows a frame (decoding error), so a
+// broken video never holds the app. Slow TVs need far more than a fast one:
+// on the XGIMI projector the first frame comes 4 to 7 s after this overlay
+// mounts on a cold start, so 12 s leaves some margin.
+const FIRST_FRAME_TIMEOUT_MS = 12000;
 
 export default function SplashOverlay({ onDone }: { onDone: () => void }) {
   const [opacity] = useState(() => new Animated.Value(1));
