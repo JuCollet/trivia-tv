@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
-import FocusableButton from '@/components/FocusableButton';
+import FocusableButton, { GO_RING } from '@/components/FocusableButton';
 import PlayerSlot, { type LobbyPlayer } from '@/components/PlayerSlot';
 import QrCode from '@/components/QrCode';
 import Screen from '@/components/Screen';
 import RulesCarousel from '@/components/RulesCarousel';
-import SettingsDialog, { languageLabel } from '@/components/SettingsDialog';
+import SettingsDialog from '@/components/SettingsDialog';
 import { JOIN_URL, joinLink } from '@/api/client';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useGame } from '@/game/GameProvider';
@@ -17,11 +17,13 @@ import { estimateGameMinutes, MAX_PLAYERS, MIN_PLAYERS } from '@/game/rules';
 import type { GameSettings } from '@/game/types';
 import { useBackgroundMusic } from '@/hooks/useBackgroundMusic';
 import { setLanguage } from '@/i18n';
-import { colors, fonts, radius, s, safeArea, spacing } from '@/theme';
+import { colors, fonts, s, spacing } from '@/theme';
 
 const BACKGROUND = require('../../assets/images/backgrounds/neutral.jpg');
 const SLOTS_PER_ROW = MAX_PLAYERS / 2;
-const SEAT_SIZE = s(92);
+const SEAT_SIZE = s(100);
+// Same gap above, right of and below the sidebar card.
+const CARD_MARGIN = s(32);
 // Shown without the scheme, for players who type the address and the code.
 const JOIN_HOST = JOIN_URL.replace(/^https?:\/\//, '');
 
@@ -48,7 +50,8 @@ function useDayPart(): DayPart {
 // TV screen 1: the room is created as soon as the app opens. Players join with
 // the QR code or the room code and enter their themes in secret on their phone;
 // the host tweaks the settings and starts the game with the remote.
-// Left: who is playing. Right: how to join, the settings and the rules.
+// Left: who is playing, with a line saying what the game still waits for.
+// Right: a card with how to join, the settings summary, the rules and the settings.
 export default function TvLobby() {
   useBackgroundMusic(MUSIC.lobby, 0.4);
   const { t } = useTranslation();
@@ -102,71 +105,73 @@ export default function TvLobby() {
   return (
     <Screen background={BACKGROUND} style={styles.screen}>
       <View style={styles.left}>
-        <AppText variant="hero" style={styles.title}>
-          {t('lobby.titleStart')}
-          <Text style={styles.titleHighlight}>{t(`lobby.title_${part}`)}</Text>
-        </AppText>
+        <View style={styles.heading}>
+          <AppText variant="hero" style={styles.title}>
+            {t('lobby.titleStart')}
+            <Text style={styles.titleHighlight}>{t(`lobby.title_${part}`)}</Text>
+          </AppText>
+          <Status players={players} />
+        </View>
 
-        <PlayerGrid players={players} />
-
-        <Legend players={players} />
+        <View style={styles.stage}>
+          <PlayerGrid players={players} />
+        </View>
 
         <FocusableButton
           label={t('lobby.launch')}
           icon="play"
-          variant="launch"
+          variant="go"
           onPress={game.start}
           disabled={!canStart}
           sound="start"
           hasTVPreferredFocus={canStart}
-          style={styles.launchButton}
-          labelStyle={styles.launchLabel}
+          style={styles.go}
         />
       </View>
 
-      <View style={styles.sidebar}>
-        <View style={styles.join}>
+      <View style={styles.card}>
+        <View style={styles.cardBody}>
           <AppText variant="display" style={styles.joinTitle}>
             <Text style={styles.joinHighlight}>{t('lobby.joinHighlight')}</Text> {t('lobby.joinRest')}
           </AppText>
-          <QrCode value={joinLink(code)} size={s(124)} style={styles.qr} />
-          <AppText style={styles.scanText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-            {t('lobby.orUrl', { host: JOIN_HOST })}
-          </AppText>
-          <View style={styles.code}>
-            <AppText variant="hero" style={styles.codeText}>
-              {code}
+          <View style={styles.join}>
+            <QrCode value={joinLink(code)} size={s(116)} style={styles.qr} />
+            <View style={styles.code}>
+              <AppText variant="hero" style={styles.codeText}>
+                {code}
+              </AppText>
+            </View>
+            <AppText style={styles.scanText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {t('lobby.orUrl', { host: JOIN_HOST })}
             </AppText>
+          </View>
+
+          <View style={styles.infos}>
+            <Info icon="timer-outline" accent>
+              {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
+            </Info>
+            <Info icon="layers-outline">{t('lobby.rounds', { count: settings.rounds })}</Info>
+            <Info icon="help-circle-outline">{t('lobby.questions', { count: settings.questionsPerTheme })}</Info>
+            <Info icon="stopwatch-outline">{t('lobby.timer', { count: settings.timerSeconds })}</Info>
           </View>
         </View>
 
-        <View style={styles.infos}>
-          <Info icon="timer-outline" accent>
-            {minutes === null ? t('lobby.durationUnknown') : t('lobby.duration', { minutes })}
-          </Info>
-          <Info icon="layers-outline">{t('lobby.rounds', { count: settings.rounds })}</Info>
-          <Info icon="help-circle-outline">{t('lobby.questions', { count: settings.questionsPerTheme })}</Info>
-          <Info icon="stopwatch-outline">{t('lobby.timer', { count: settings.timerSeconds })}</Info>
-          <Info icon="globe-outline">{languageLabel(settings.language)}</Info>
-        </View>
-
-        <View style={styles.sideActions}>
+        <View style={styles.footer}>
           <FocusableButton
             label={t('lobby.rules')}
             icon="book"
-            variant="outline"
+            variant="footer"
             onPress={() => setRulesOpen(true)}
-            style={styles.sideButton}
-            labelStyle={styles.sideLabel}
+            style={styles.footerButton}
           />
+          <View style={styles.footerDivider} />
           <FocusableButton
             label={t('lobby.settings')}
             icon="settings-sharp"
-            variant="outline"
+            variant="footer"
             onPress={openSettings}
             hasTVPreferredFocus={!canStart}
-            style={styles.sideButton}
-            labelStyle={styles.sideLabel}
+            style={styles.footerButton}
           />
         </View>
       </View>
@@ -184,6 +189,8 @@ export default function TvLobby() {
   );
 }
 
+// One full-width chip of the settings summary. The language is left out: the
+// interface already speaks it.
 function Info({
   icon,
   accent,
@@ -195,8 +202,8 @@ function Info({
 }) {
   const color = accent ? colors.accent : colors.text;
   return (
-    <View style={styles.infoRow}>
-      <Ionicons name={icon} size={s(17)} color={color} />
+    <View style={[styles.info, accent && styles.infoAccent]}>
+      <Ionicons name={icon} size={s(16)} color={color} />
       <AppText style={[styles.infoText, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
         {children}
       </AppText>
@@ -229,114 +236,125 @@ function PlayerGrid({ players }: { players: LobbyPlayer[] }) {
   );
 }
 
-// Explains the ring colors, only those on screen, and what is still missing to start.
-function Legend({ players }: { players: LobbyPlayer[] }) {
+// What the game still waits for: more players, then the themes of one or
+// several players, until everyone is ready.
+function Status({ players }: { players: LobbyPlayer[] }) {
   const { t } = useTranslation();
   const missing = MIN_PLAYERS - players.length;
-  const anyWaiting = players.some((p) => !p.ready);
-  const anyReady = players.some((p) => p.ready);
+  const waiting = players.filter((p) => !p.ready);
+  const text =
+    missing > 0
+      ? t('lobby.status.missingPlayers', { count: missing })
+      : waiting.length === 1
+        ? t('lobby.status.waitingFor', { name: waiting[0].name })
+        : waiting.length > 1
+          ? t('lobby.status.waitingCount', { count: waiting.length })
+          : t('lobby.status.ready');
   return (
-    <View style={styles.legend}>
-      {anyWaiting ? <LegendItem color={colors.notReady} label={t('lobby.legendWaiting')} /> : null}
-      {anyReady ? <LegendItem color={colors.ready} label={t('lobby.legendReady')} /> : null}
-      {missing > 0 ? (
-        <AppText style={styles.legendText}>{t('lobby.missingPlayers', { count: missing })}</AppText>
-      ) : null}
-    </View>
-  );
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color }]} />
-      <AppText style={styles.legendText}>{label}</AppText>
-    </View>
+    <AppText style={styles.status} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+      {text}
+    </AppText>
   );
 }
 
 const styles = StyleSheet.create({
-  // The sidebar runs the full height and to the right edge: the screen only
-  // keeps the safe area on the left, and each side pads itself.
+  // The card keeps the same gap to the top, right and bottom edges; the left
+  // side keeps the safe area and centers its content in what remains.
   screen: {
     flexDirection: 'row',
-    gap: spacing.lg,
+    gap: 0,
+    paddingLeft: 0,
     paddingRight: 0,
     paddingVertical: 0,
   },
+  // Title at the top and GO at the bottom, lined up with the card's edges;
+  // the avatars are centered between the status line and GO.
   left: {
     flex: 1,
-    paddingVertical: safeArea.vertical,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingVertical: CARD_MARGIN,
+  },
+  heading: {
+    alignItems: 'center',
+    // Lilita's line box leaves room above the capitals: pull it up so they
+    // line up with the top of the card.
+    marginTop: -s(6),
   },
   title: {
-    fontSize: s(40),
-    lineHeight: s(48),
+    fontSize: s(46),
+    lineHeight: s(52),
   },
   titleHighlight: {
     color: colors.highlight,
   },
+  status: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: s(17),
+    color: colors.highlight,
+    marginTop: s(4),
+  },
+  stage: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   grid: {
-    gap: spacing.md,
+    gap: s(10),
   },
   gridRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: s(20),
+    gap: s(18),
   },
-  legend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    columnGap: spacing.lg,
-    rowGap: spacing.xs,
-    minHeight: s(20),
+  // The face, not its focus ring, lines up with the bottom of the card.
+  go: {
+    marginBottom: -GO_RING,
   },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  card: {
+    width: s(252),
+    marginVertical: CARD_MARGIN,
+    marginRight: CARD_MARGIN,
+    borderRadius: s(22),
+    borderWidth: s(1.5),
+    borderColor: colors.cardBorder,
+    backgroundColor: colors.card,
+    overflow: 'hidden',
   },
-  legendDot: {
-    width: s(10),
-    height: s(10),
-    borderRadius: s(5),
-  },
-  legendText: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: s(14),
-    color: colors.highlight,
-  },
-  launchButton: {
-    width: s(320),
-  },
-  launchLabel: {
-    fontSize: s(26),
-  },
-  sidebar: {
-    width: s(290),
-    gap: spacing.md,
-    // Symmetric, so the content is centered; the right side still clears overscan.
-    paddingHorizontal: safeArea.horizontal,
-    paddingVertical: safeArea.vertical,
-    backgroundColor: colors.sidebar,
-  },
-  join: {
-    alignItems: 'center',
-    gap: spacing.sm,
+  cardBody: {
+    flex: 1,
+    paddingHorizontal: s(18),
+    paddingTop: s(16),
+    paddingBottom: s(16),
   },
   joinTitle: {
     fontSize: s(22),
+    lineHeight: s(26),
     textAlign: 'center',
   },
   joinHighlight: {
     color: colors.accent,
   },
+  join: {
+    alignItems: 'center',
+    gap: s(10),
+    marginTop: s(12),
+  },
   qr: {
     borderWidth: s(4),
     borderColor: colors.accent,
+  },
+  code: {
+    width: s(150),
+    height: s(32),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: s(10),
+    backgroundColor: colors.accent,
+  },
+  codeText: {
+    fontSize: s(21),
+    lineHeight: s(26),
+    letterSpacing: s(5),
+    color: colors.onBright,
   },
   scanText: {
     fontFamily: fonts.bodyMedium,
@@ -344,45 +362,43 @@ const styles = StyleSheet.create({
     color: colors.highlight,
     textAlign: 'center',
   },
-  code: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    marginHorizontal: spacing.lg,
-    borderRadius: s(24),
-    borderWidth: s(1.5),
-    borderColor: colors.panelBorder,
-    backgroundColor: colors.background,
-  },
-  codeText: {
-    fontSize: s(26),
-    letterSpacing: s(3),
-  },
-  // The rows stay left-aligned with each other, as a block centered in the sidebar.
+  // Full-width chips, centered in the room left between the code and the footer.
   infos: {
     flex: 1,
-    alignSelf: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
+    marginTop: s(4),
   },
-  infoRow: {
+  info: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    paddingVertical: s(6),
+    paddingHorizontal: s(12),
+    borderRadius: s(12),
+    backgroundColor: colors.chip,
+  },
+  infoAccent: {
+    backgroundColor: colors.chipAccent,
   },
   infoText: {
+    flexShrink: 1,
     fontFamily: fonts.bodySemiBold,
     fontSize: s(15),
   },
-  sideActions: {
-    gap: spacing.sm,
+  // Rules and Settings share the bottom of the card, half its width each.
+  footer: {
+    flexDirection: 'row',
+    height: s(46),
+    borderTopWidth: s(1.5),
+    borderTopColor: colors.cardBorder,
   },
-  sideButton: {
-    paddingVertical: s(6),
-    borderRadius: radius.md,
+  footerButton: {
+    flex: 1,
+    paddingVertical: 0,
   },
-  sideLabel: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: s(16),
-    color: colors.highlight,
+  footerDivider: {
+    width: s(1.5),
+    backgroundColor: colors.cardBorder,
   },
 });

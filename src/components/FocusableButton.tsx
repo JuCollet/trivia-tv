@@ -3,11 +3,15 @@ import { Pressable, StyleSheet, View, type TextStyle, type ViewStyle } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import { playSfx, type SfxName } from '@/audio/sounds';
-import { colors, radius, s, spacing } from '@/theme';
+import { colors, fonts, radius, s, spacing } from '@/theme';
 
 // 'round': a white disc showing only the icon (the label is read by
 // accessibility), with a translucent ring around it on focus.
-type Variant = 'primary' | 'secondary' | 'outline' | 'launch' | 'round';
+// 'go': a pill-shaped call to action, green with navy text, wrapped in a
+// translucent ring on focus (same look as the round buttons, without any
+// fake 3D edge). Greyed out while disabled.
+// 'footer': a flat cell meant to fill part of a card's footer; focus lights it up.
+type Variant = 'primary' | 'secondary' | 'outline' | 'round' | 'go' | 'footer';
 
 type Props = {
   label: string;
@@ -66,7 +70,28 @@ export default function FocusableButton({
     skipNextFocusSound = true;
   }, []);
 
-  const textStyle = StyleSheet.flatten<TextStyle>([styles.label, LABEL_STYLES[variant], labelStyle]);
+  const textStyle = StyleSheet.flatten<TextStyle>([
+    styles.label,
+    LABEL_STYLES[variant],
+    variant === 'go' && disabled && styles.goDisabledLabel,
+    variant === 'footer' && focused && styles.footerFocusedLabel,
+    labelStyle,
+  ]);
+  const content = (
+    <>
+      {icon ? (
+        <Ionicons
+          name={icon}
+          // The go button's play icon stays a bit smaller than its big label.
+          size={variant === 'go' ? Math.round((textStyle.fontSize ?? 0) * 0.8) : textStyle.fontSize}
+          color={textStyle.color as string}
+        />
+      ) : null}
+      <AppText variant="title" style={textStyle}>
+        {label}
+      </AppText>
+    </>
+  );
 
   return (
     <Pressable
@@ -101,8 +126,9 @@ export default function FocusableButton({
       style={({ pressed }) => [
         styles.base,
         styles[variant],
-        focused && (variant === 'round' ? styles.roundFocused : styles.focused),
-        (pressed || disabled) && styles.dimmed,
+        focused && FOCUSED_STYLES[variant],
+        // The go button shows its disabled state on its face.
+        (pressed || (disabled && variant !== 'go')) && styles.dimmed,
         style,
       ]}
     >
@@ -110,13 +136,10 @@ export default function FocusableButton({
         <View style={styles.roundFace}>
           {icon ? <Ionicons name={icon} size={ROUND_ICON_SIZE} color={colors.background} /> : null}
         </View>
-      ) : icon ? (
-        <Ionicons name={icon} size={textStyle.fontSize} color={textStyle.color as string} />
-      ) : null}
-      {variant === 'round' ? null : (
-        <AppText variant="title" style={textStyle}>
-          {label}
-        </AppText>
+      ) : variant === 'go' ? (
+        <View style={[styles.goFace, disabled && styles.goFaceDisabled]}>{content}</View>
+      ) : (
+        content
       )}
     </Pressable>
   );
@@ -125,6 +148,9 @@ export default function FocusableButton({
 export const ROUND_SIZE = s(64);
 export const ROUND_RING = s(5);
 const ROUND_ICON_SIZE = s(30);
+const GO_HEIGHT = s(56);
+// Room around the go button's face for its focus ring.
+export const GO_RING = s(5);
 
 const styles = StyleSheet.create({
   base: {
@@ -152,12 +178,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panel,
     borderColor: colors.panelBorder,
   },
-  // Big red call to action with a darker bottom edge, like an arcade button.
-  launch: {
-    backgroundColor: colors.launch,
-    borderBottomColor: colors.launchEdge,
-    borderBottomWidth: s(5),
-    borderRadius: radius.lg,
+  // The ring around the face: invisible until focused.
+  go: {
+    paddingVertical: GO_RING,
+    paddingHorizontal: GO_RING,
+    borderWidth: 0,
+    borderRadius: GO_HEIGHT,
+  },
+  goFace: {
+    height: GO_HEIGHT,
+    paddingLeft: s(18),
+    paddingRight: s(22),
+    borderRadius: GO_HEIGHT / 2,
+    borderWidth: s(2),
+    borderColor: colors.ready,
+    backgroundColor: colors.ready,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(10),
+  },
+  goFaceDisabled: {
+    borderColor: colors.disabledBorder,
+    backgroundColor: colors.disabledFill,
+  },
+  goDisabledLabel: {
+    color: colors.disabledText,
+  },
+  footer: {
+    borderWidth: 0,
+    borderRadius: 0,
+    backgroundColor: colors.cardFooter,
+  },
+  footerFocusedLabel: {
+    color: colors.text,
   },
   // The disc plus the room for its focus ring: place it by the ring's outer edge.
   round: {
@@ -183,6 +236,12 @@ const styles = StyleSheet.create({
     borderColor: colors.focus,
     transform: [{ scale: 1.06 }],
   },
+  goFocused: {
+    backgroundColor: colors.focusRing,
+  },
+  footerFocused: {
+    backgroundColor: colors.cardFooterFocused,
+  },
   dimmed: {
     opacity: 0.6,
   },
@@ -192,6 +251,16 @@ const LABEL_STYLES = StyleSheet.create({
   primary: { color: colors.background },
   secondary: {},
   outline: {},
-  launch: {},
   round: {},
+  go: { color: colors.onBright, fontFamily: fonts.bodyBold, fontSize: s(28), letterSpacing: s(1) },
+  footer: { color: colors.highlight, fontFamily: fonts.bodySemiBold, fontSize: s(15) },
 });
+
+const FOCUSED_STYLES = {
+  primary: styles.focused,
+  secondary: styles.focused,
+  outline: styles.focused,
+  round: styles.roundFocused,
+  go: styles.goFocused,
+  footer: styles.footerFocused,
+};

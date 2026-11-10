@@ -1,11 +1,14 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import AvatarMedia from './AvatarMedia';
 import { avatarSource } from '@/game/avatars';
 import { avatarVideo } from '@/game/avatarVideos';
-import { colors, fonts, s, spacing } from '@/theme';
+import { colors, fonts, s } from '@/theme';
+
+const READY_BADGE = require('../../assets/images/status/ready.png');
+const WAITING_BADGE = require('../../assets/images/status/waiting.png');
 
 export type LobbyPlayer = {
   id: string;
@@ -18,9 +21,10 @@ export type LobbyPlayer = {
 
 type Props = { size: number } & ({ player: LobbyPlayer } | { player?: undefined; hint?: boolean });
 
-// Lobby seat: a round avatar with the player's name, or a free seat at half
-// opacity. The avatar always sits on dark navy: its ring is orange while the
-// player still types their themes, and turns green once they are ready.
+// Lobby seat: a round avatar ringed in white, the player's name on a tilted
+// pill over its bottom edge, and a status badge (check once their themes are
+// in, dots while they still type them). A free seat is a dashed circle; the
+// first one invites the next player to scan the code.
 export default function PlayerSlot(props: Props) {
   const { t } = useTranslation();
   const { size } = props;
@@ -29,12 +33,14 @@ export default function PlayerSlot(props: Props) {
   if (!props.player) {
     return (
       <View style={[styles.slot, { width: size }]}>
-        <View style={[styles.circle, styles.empty, circle]}>
-          {props.hint ? <Ionicons name="phone-portrait-outline" size={s(26)} color={colors.text} /> : null}
+        <View style={[styles.free, circle, props.hint && styles.hintCircle]}>
+          {props.hint ? <Ionicons name="phone-portrait-outline" size={s(28)} color={colors.highlight} /> : null}
         </View>
-        <AppText style={[styles.name, styles.hint]} numberOfLines={1}>
-          {props.hint ? t('slot.scan') : ' '}
-        </AppText>
+        <View style={[styles.pill, styles.hintPill, !props.hint && styles.hidden]}>
+          <AppText style={styles.name} numberOfLines={1}>
+            {t('slot.scan')}
+          </AppText>
+        </View>
       </View>
     );
   }
@@ -42,20 +48,29 @@ export default function PlayerSlot(props: Props) {
   const { player } = props;
   const source = avatarSource(player.avatar);
   const video = avatarVideo(player.avatar, 'neutral');
+  const badge = Math.round(size * 0.38);
   return (
     <View style={[styles.slot, { width: size }, !player.connected && styles.disconnected]}>
-      <View style={[styles.circle, circle, player.ready ? styles.ready : styles.waiting]}>
-        {source || video ? (
-          <AvatarMedia still={source} video={video} />
-        ) : (
-          <AppText variant="display" style={{ fontSize: size / 2.4 }}>
-            {player.name.charAt(0).toUpperCase()}
-          </AppText>
-        )}
+      <View style={[styles.seat, circle]}>
+        <View style={[styles.face, { borderRadius: size / 2 }]}>
+          {source || video ? (
+            <AvatarMedia still={source} video={video} size="84%" />
+          ) : (
+            <AppText variant="display" style={{ fontSize: size / 2.4 }}>
+              {player.name.charAt(0).toUpperCase()}
+            </AppText>
+          )}
+        </View>
+        <Image
+          source={player.ready ? READY_BADGE : WAITING_BADGE}
+          style={[styles.badge, { width: badge, height: badge }]}
+        />
       </View>
-      <AppText style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-        {player.name}
-      </AppText>
+      <View style={styles.pill}>
+        <AppText style={styles.name} numberOfLines={1}>
+          {player.name}
+        </AppText>
+      </View>
     </View>
   );
 }
@@ -63,37 +78,60 @@ export default function PlayerSlot(props: Props) {
 const styles = StyleSheet.create({
   slot: {
     alignItems: 'center',
-    gap: spacing.xs,
   },
-  circle: {
+  seat: {
+    backgroundColor: colors.seat,
+    borderWidth: s(4),
+    borderColor: colors.text,
+  },
+  // Clips the avatar to the circle; the badge stays outside of it.
+  face: {
+    flex: 1,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-    borderWidth: s(5),
   },
-  empty: {
-    backgroundColor: colors.seat,
-    borderColor: 'transparent',
-    opacity: 0.5,
+  badge: {
+    position: 'absolute',
+    right: -s(8),
+    bottom: -s(4),
   },
-  waiting: {
-    backgroundColor: colors.seat,
-    borderColor: colors.notReady,
+  free: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: s(2.5),
+    borderStyle: 'dashed',
+    borderColor: colors.freeSeat,
+    backgroundColor: colors.freeSeatFill,
   },
-  ready: {
-    backgroundColor: colors.seat,
-    borderColor: colors.ready,
+  hintCircle: {
+    borderColor: colors.highlight,
+    backgroundColor: colors.seatHint,
   },
-  // Lighter than a free seat's 50%, so the player still reads as there.
-  disconnected: {
-    opacity: 0.7,
+  // Overlaps the bottom of the circle, slightly tilted like the award badges.
+  pill: {
+    marginTop: -s(10),
+    maxWidth: '118%',
+    paddingHorizontal: s(12),
+    paddingVertical: s(1),
+    borderRadius: s(12),
+    backgroundColor: colors.text,
+    transform: [{ rotate: '-3deg' }],
+  },
+  hintPill: {
+    backgroundColor: colors.highlight,
+  },
+  hidden: {
+    opacity: 0,
   },
   name: {
     fontFamily: fonts.bodyBold,
-    fontSize: s(20),
-    maxWidth: '120%',
+    fontSize: s(16),
+    lineHeight: s(22),
+    color: colors.onBright,
   },
-  hint: {
-    color: colors.highlight,
+  // Faded, so the player still reads as there but away.
+  disconnected: {
+    opacity: 0.6,
   },
 });
