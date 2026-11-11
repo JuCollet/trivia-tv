@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Image, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEvent } from 'expo';
@@ -23,7 +23,6 @@ const LOGO_WIDTH = 0.42;
 export default function SplashOverlay({ onDone }: { onDone: () => void }) {
   const { t } = useTranslation();
   const [opacity] = useState(() => new Animated.Value(1));
-  const [promptOpacity] = useState(() => new Animated.Value(1));
   const leaving = useRef(false);
   const player = useVideoPlayer(VIDEO, (p) => {
     p.muted = true;
@@ -56,15 +55,7 @@ export default function SplashOverlay({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     SplashScreen.hide();
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(promptOpacity, { toValue: 0.4, duration: 900, useNativeDriver: false }),
-        Animated.timing(promptOpacity, { toValue: 1, duration: 900, useNativeDriver: false }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [promptOpacity]);
+  }, []);
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, { opacity }]}>
@@ -76,9 +67,9 @@ export default function SplashOverlay({ onDone }: { onDone: () => void }) {
           style={{ width: logoWidth, height: Math.round(logoWidth / LOGO_RATIO) }}
           resizeMode="contain"
         />
-        <Animated.View style={[styles.prompt, { opacity: promptOpacity }]}>
+        <View style={styles.prompt}>
           <AppText variant="title">{t('web.start')}</AppText>
-        </Animated.View>
+        </View>
       </Pressable>
     </Animated.View>
   );
