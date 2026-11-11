@@ -38,6 +38,10 @@ let skipNextFocusSound = false;
 let lastFocusedId: string | null = null;
 // Off while the splash screen covers the app: nothing can be seen anyway.
 let focusSoundEnabled = true;
+// A press can move focus by itself (a dialog closes, a panel is swapped): the
+// press already made its sound, so the focus it causes stays silent.
+let lastPressAt = 0;
+const FOCUS_AFTER_PRESS_MS = 500;
 
 // Off while the splash screen covers the app: OK on the remote skips the
 // intro and must not also press the button focused underneath.
@@ -104,6 +108,7 @@ export default function FocusableButton({
           void playSfx('disabled');
           return;
         }
+        lastPressAt = Date.now();
         void playSfx(sound);
         onPress?.();
       }}
@@ -117,6 +122,7 @@ export default function FocusableButton({
           skipNextFocusSound = false;
           return;
         }
+        if (Date.now() - lastPressAt < FOCUS_AFTER_PRESS_MS) return;
         if (focusSoundEnabled && !isRefocus) void playSfx('focus');
       }}
       onBlur={() => setFocused(false)}
