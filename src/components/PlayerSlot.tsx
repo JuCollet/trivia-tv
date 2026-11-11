@@ -9,6 +9,7 @@ import { colors, fonts, s } from '@/theme';
 
 const READY_BADGE = require('../../assets/images/status/ready.png');
 const WAITING_BADGE = require('../../assets/images/status/waiting.png');
+const DISCONNECTED_BADGE = require('../../assets/images/status/disconnected.png');
 
 export type LobbyPlayer = {
   id: string;
@@ -23,7 +24,8 @@ type Props = { size: number } & ({ player: LobbyPlayer } | { player?: undefined;
 
 // Lobby seat: a round avatar ringed in white, the player's name on a tilted
 // pill over its bottom edge, and a status badge (check once their themes are
-// in, dots while they still type them). A free seat is a dashed circle; the
+// in, dots while they still type them, question mark while their phone is
+// disconnected). A free seat is a dashed circle; the
 // first one invites the next player to scan the code.
 export default function PlayerSlot(props: Props) {
   const { t } = useTranslation();
@@ -49,10 +51,11 @@ export default function PlayerSlot(props: Props) {
   const source = avatarSource(player.avatar);
   const video = avatarVideo(player.avatar, 'neutral');
   const badge = Math.round(size * 0.38);
+  const status = !player.connected ? DISCONNECTED_BADGE : player.ready ? READY_BADGE : WAITING_BADGE;
   return (
-    <View style={[styles.slot, { width: size }, !player.connected && styles.disconnected]}>
+    <View style={[styles.slot, { width: size }]}>
       <View style={[styles.seat, circle]}>
-        <View style={[styles.face, { borderRadius: size / 2 }]}>
+        <View style={[styles.face, { borderRadius: size / 2 }, !player.connected && styles.disconnected]}>
           {source || video ? (
             <AvatarMedia still={source} video={video} size="84%" />
           ) : (
@@ -62,7 +65,7 @@ export default function PlayerSlot(props: Props) {
           )}
         </View>
         <Image
-          source={player.ready ? READY_BADGE : WAITING_BADGE}
+          source={status}
           style={[styles.badge, { width: badge, height: badge }]}
         />
       </View>
@@ -130,8 +133,8 @@ const styles = StyleSheet.create({
     lineHeight: s(22),
     color: colors.onBright,
   },
-  // Faded, so the player still reads as there but away.
+  // Only the avatar fades: the name and the status badge stay fully readable.
   disconnected: {
-    opacity: 0.6,
+    opacity: 0.4,
   },
 });
