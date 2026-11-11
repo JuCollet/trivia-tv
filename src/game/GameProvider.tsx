@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { router, usePathname, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { GamePhase, SettingsView, TvView } from '@jucollet/trivia-client/schema';
@@ -6,7 +6,7 @@ import { CloseCode, connectTv, type TvConnection } from '@jucollet/trivia-client
 import { api, API_URL } from '@/api/client';
 import { setLanguage } from '@/i18n';
 import { DEFAULT_SETTINGS } from './rules';
-import type { GameSettings, Language } from './types';
+import type { Award, GameSettings, Language } from './types';
 
 const RETRY_DELAYS_MS = [500, 1_000, 2_000, 4_000, 8_000];
 
@@ -33,6 +33,8 @@ type GameContextValue = {
   error: string | null;
   // Themes revealed so far in this game, shown again on the final question's slot machine.
   playedThemes: string[];
+  // Awards won since the start of this game, round after round, for the podium.
+  gameAwards: Award[];
   // Creates a new game, replacing the current one: the phones connected to
   // the current one follow it with the same name and avatar.
   newGame: (settings?: GameSettings) => void;
@@ -130,14 +132,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
   }, [game, createGame]);
 
-  // Kept on the TV: the server sends the theme of the current round only.
-  const [played, setPlayed] = useState<{ game: HostedGame | null; themes: string[] }>({ game: null, themes: [] });
+  // Kept on the TV: the server sends the theme and the awards of the current round only.
+  const [played, setPlayed] = useState<{ game: HostedGame | null; themes: string[]; awards: Record<number, Award[]> }>(
+    { game: null, themes: [], awards: {} },
+  );
   const roundTheme = view?.round && !view.round.isFinal ? view.round.theme : null;
+  const roundNumber = view?.roundEnd ? view.round?.number : undefined;
   if (played.game !== game) {
-    setPlayed({ game, themes: [] });
+    setPlayed({ game, themes: [], awards: {} });
   } else if (roundTheme && !played.themes.includes(roundTheme)) {
-    setPlayed({ game, themes: [...played.themes, roundTheme] });
+    setPlayed({ ...played, themes: [...played.themes, roundTheme] });
+  } else if (view?.roundEnd && roundNumber !== undefined && !played.awards[roundNumber]) {
+    // The server uses the same award ids as the TV.
+    setPlayed({ ...played, awards: { ...played.awards, [roundNumber]: view.roundEnd.awards as Award[] } });
   }
+  const gameAwards = useMemo(() => Object.values(played.awards).flat(), [played.awards]);
 
   const phase = view?.phase;
   const pathname = usePathname();
@@ -153,6 +162,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     view,
     settings,
     playedThemes: played.themes,
+    gameAwards,
     error: error && (error.key === 'unreachable' ? t('errors.unreachable', { url: error.url }) : t('errors.createFailed')),
     newGame: (next = settings) => {
       setRequested(next);

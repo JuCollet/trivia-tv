@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import AppText from './AppText';
 import FocusableButton from './FocusableButton';
 import { playSfx } from '@/audio/sounds';
-import type { AwardId } from '@/game/types';
+import { AWARD_IMAGES, AWARD_ORDER } from '@/game/awardImages';
 import { useRemoteEvents } from '@/hooks/useRemoteEvents';
 import { colors, fonts, radius, s, spacing } from '@/theme';
 
@@ -22,13 +22,7 @@ const RULES: { key: RuleKey; icon: IconName }[] = [
 
 // In the order the end-of-round screen shows them. The good theme bonus is
 // no longer part of the rules, so it is not presented.
-const TROPHIES: { id: AwardId; image: number }[] = [
-  { id: 'plusViteQueSonOmbre', image: require('../../assets/images/awards/plusViteQueSonOmbre.png') },
-  { id: 'outsider', image: require('../../assets/images/awards/outsider.png') },
-  { id: 'seulContreTous', image: require('../../assets/images/awards/seulContreTous.png') },
-  { id: 'pasMonTruc', image: require('../../assets/images/awards/pasMonTruc.png') },
-  { id: 'bonnetDane', image: require('../../assets/images/awards/bonnetDane.png') },
-];
+const TROPHIES = AWARD_ORDER.map((id) => ({ id, image: AWARD_IMAGES[id] }));
 
 type Page = ({ kind: 'rule' } & (typeof RULES)[number]) | ({ kind: 'trophy' } & (typeof TROPHIES)[number]);
 

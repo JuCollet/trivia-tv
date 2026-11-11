@@ -159,8 +159,9 @@ const fr = {
     },
   },
   finale: {
-    podium: 'Podium',
-    points: '{{count}} pts',
+    winner: '{{name}} remporte la partie !',
+    ranking: 'Classement',
+    pointsUnit: 'pts',
   },
 };
 
