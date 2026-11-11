@@ -117,7 +117,13 @@ export default function TvFinale() {
 
         <View style={[styles.podium, { left: podiumLeft }]}>
           {order.map((rank) => (
-            <Step key={top[rank].playerId} rank={rank} player={top[rank]} unit={t('finale.pointsUnit')} />
+            <Step
+              key={top[rank].playerId}
+              rank={rank}
+              player={top[rank]}
+              happy={top[rank].score === top[0].score}
+              unit={t('finale.pointsUnit')}
+            />
           ))}
         </View>
 
@@ -166,8 +172,9 @@ function Rays({ size, x, y }: { size: number; x: number; y: number }) {
   );
 }
 
-// One step of the podium with its player above. `rank` starts at 0.
-function Step({ rank, player, unit }: { rank: number; player: Entry; unit: string }) {
+// One step of the podium with its player above. `rank` starts at 0. `happy` is true
+// for the winner and anyone tied with them on points: everybody else is sad.
+function Step({ rank, player, happy, unit }: { rank: number; player: Entry; happy: boolean; unit: string }) {
   const value = usePop(POP_DELAY.steps[rank]);
   // Rises from below the screen; the face runs past the bottom edge, so the
   // spring's overshoot never shows a gap under the step.
@@ -175,13 +182,14 @@ function Step({ rank, player, unit }: { rank: number; player: Entry; unit: strin
   const size = AVATAR_SIZE[rank];
   const { face, ink } = podiumSteps[rank];
   const still = avatarSource(player.avatar);
-  const video = avatarVideo(player.avatar, rank === 0 ? 'happy' : 'neutral');
+  // No clip for this avatar: AvatarMedia falls back to the still image.
+  const video = avatarVideo(player.avatar, happy ? 'happy' : 'sad');
 
   return (
     <Animated.View style={[styles.step, { opacity: popOpacity(value), transform: [{ translateY }] }]}>
       <View style={[styles.avatarGlow, { width: size, height: size, borderRadius: size / 2 }]}>
         <View style={[styles.avatarCircle, { borderRadius: size / 2 }]}>
-          <AvatarMedia still={still} video={video} delays={rank === 0 ? WINNER_VIDEO_DELAYS : undefined} size="84%" />
+          <AvatarMedia still={still} video={video} delays={happy ? WINNER_VIDEO_DELAYS : undefined} size="84%" />
         </View>
       </View>
       <View style={styles.pill}>
