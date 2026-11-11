@@ -85,21 +85,15 @@ const fr = {
     reading: 'Lisez bien la question, les réponses arrivent…',
   },
   results: {
-    correctAnswer: 'Bonne réponse',
-    nobody: 'Personne n’a trouvé',
-    ranking: 'Classement',
+    noAnswer_one: '{{names}} n’a pas répondu',
+    noAnswer_other: '{{names}} n’ont pas répondu',
     podium: 'Voir le podium',
     roundEnd: 'Fin de manche',
     nextQuestion: 'Question suivante',
-    breakdown: {
-      title: 'Détail des points',
-      correct: 'bonne réponse',
-      speed: 'rapidité',
-      wrong: 'mauvaise réponse, moitié de la rapidité perdue',
-      noAnswer: 'pas de réponse',
-      steals: 'volés à {{name}}',
-      stolen: 'volés par {{name}}',
-    },
+  },
+  standings: {
+    title: 'Classement',
+    subtitle: 'Après le thème « {{theme}} » · Manche {{number}}/{{total}}',
   },
   awards: {
     continue: 'Continuer',

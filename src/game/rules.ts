@@ -12,8 +12,6 @@ export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 10;
 export const MAX_THEME_LENGTH = 60;
 export const ROOM_CODE_LENGTH = 4;
-// Points the fastest correct challenger steals from the master on each question.
-export const STEAL_POINTS_PER_QUESTION = 200;
 
 // Rough game length shown in the lobby: each question adds its timer plus the
 // answer reveal, each theme adds its announcement and end-of-round awards,

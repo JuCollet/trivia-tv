@@ -35,6 +35,9 @@ type GameContextValue = {
   playedThemes: string[];
   // Awards won since the start of this game, round after round, for the podium.
   gameAwards: Award[];
+  // Each player's score when the current round's theme was revealed, to show
+  // what the round brought them. Null when the TV joined mid-round.
+  roundStartScores: Record<string, number> | null;
   // Creates a new game, replacing the current one: the phones connected to
   // the current one follow it with the same name and avatar.
   newGame: (settings?: GameSettings) => void;
@@ -133,13 +136,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [game, createGame]);
 
   // Kept on the TV: the server sends the theme and the awards of the current round only.
-  const [played, setPlayed] = useState<{ game: HostedGame | null; themes: string[]; awards: Record<number, Award[]> }>(
-    { game: null, themes: [], awards: {} },
-  );
+  const [played, setPlayed] = useState<Played>(() => emptyPlayed(null));
   const roundTheme = view?.round && !view.round.isFinal ? view.round.theme : null;
   const roundNumber = view?.roundEnd ? view.round?.number : undefined;
+  const revealedRound = view?.phase === 'THEME_REVEAL' ? view.round?.number : undefined;
   if (played.game !== game) {
-    setPlayed({ game, themes: [], awards: {} });
+    setPlayed(emptyPlayed(game));
+  } else if (revealedRound !== undefined && view && !played.startScores[revealedRound]) {
+    const scores = Object.fromEntries(view.players.map((p) => [p.id, p.score]));
+    setPlayed({ ...played, startScores: { ...played.startScores, [revealedRound]: scores } });
   } else if (roundTheme && !played.themes.includes(roundTheme)) {
     setPlayed({ ...played, themes: [...played.themes, roundTheme] });
   } else if (view?.roundEnd && roundNumber !== undefined && !played.awards[roundNumber]) {
@@ -163,6 +168,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     settings,
     playedThemes: played.themes,
     gameAwards,
+    roundStartScores: (view?.round && played.startScores[view.round.number]) || null,
     error: error && (error.key === 'unreachable' ? t('errors.unreachable', { url: error.url }) : t('errors.createFailed')),
     newGame: (next = settings) => {
       setRequested(next);
@@ -179,6 +185,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }
+
+type Played = {
+  game: HostedGame | null;
+  themes: string[];
+  // By round number.
+  awards: Record<number, Award[]>;
+  startScores: Record<number, Record<string, number>>;
+};
+
+const emptyPlayed = (game: HostedGame | null): Played => ({ game, themes: [], awards: {}, startScores: {} });
 
 async function requestGame(settings: GameSettings): Promise<HostedGame | { error: GameError }> {
   try {

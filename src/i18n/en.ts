@@ -85,21 +85,15 @@ const en: Resources = {
     reading: 'Read the question, the answers are coming…',
   },
   results: {
-    correctAnswer: 'Correct answer',
-    nobody: 'Nobody got it',
-    ranking: 'Ranking',
+    noAnswer_one: '{{names}} didn’t answer',
+    noAnswer_other: '{{names}} didn’t answer',
     podium: 'See the podium',
     roundEnd: 'End of round',
     nextQuestion: 'Next question',
-    breakdown: {
-      title: 'Points breakdown',
-      correct: 'correct answer',
-      speed: 'speed',
-      wrong: 'wrong answer, half the speed lost',
-      noAnswer: 'no answer',
-      steals: 'stolen from {{name}}',
-      stolen: 'stolen by {{name}}',
-    },
+  },
+  standings: {
+    title: 'Ranking',
+    subtitle: 'After the theme “{{theme}}” · Round {{number}}/{{total}}',
   },
   awards: {
     continue: 'Continue',
