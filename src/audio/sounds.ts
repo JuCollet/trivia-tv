@@ -1,4 +1,4 @@
-import { createAudioPlayer, type AudioPlayer, type AudioSource } from 'expo-audio';
+import { createAudioPlayer, setIsAudioActiveAsync, type AudioPlayer, type AudioSource } from 'expo-audio';
 import { AppState } from 'react-native';
 
 export const MUSIC = {
@@ -51,6 +51,33 @@ export function playMusic(source: AudioSource, volume = 0.5) {
   musicPlayer.loop = true;
   musicPlayer.volume = volume;
   musicPlayer.play();
+  startMusicWatchdog();
+}
+
+// The system can pause every player behind our back (audio route lost when the
+// TV input or HDMI/speaker changes, Siri, a session interruption) and does not
+// always tell us to resume. While a track is meant to be playing, check it
+// regularly and restart it, reactivating the audio session first.
+const WATCHDOG_INTERVAL_MS = 2000;
+let watchdog: ReturnType<typeof setInterval> | null = null;
+let appActive = AppState.currentState === 'active';
+
+function startMusicWatchdog() {
+  if (watchdog) return;
+  watchdog = setInterval(() => {
+    if (!appActive || !musicPlayer || !currentMusic) return;
+    if (musicPlayer.isLoaded && !musicPlayer.playing) {
+      console.warn('[audio] music was paused by the system, restarting');
+      void setIsAudioActiveAsync(true)
+        .catch(() => {})
+        .then(() => musicPlayer?.play());
+    }
+  }, WATCHDOG_INTERVAL_MS);
+}
+
+function stopMusicWatchdog() {
+  if (watchdog) clearInterval(watchdog);
+  watchdog = null;
 }
 
 // Starts the current track again. A browser refuses to play sound before the
@@ -65,14 +92,21 @@ export function stopMusic(source?: AudioSource) {
   musicPlayer.pause();
   void musicPlayer.seekTo(0);
   currentMusic = null;
+  stopMusicWatchdog();
 }
 
 // Silences the app when it leaves the foreground, and resumes the current
 // track when it comes back.
 AppState.addEventListener('change', (state) => {
+  appActive = state === 'active';
   if (!musicPlayer || !currentMusic) return;
-  if (state === 'active') musicPlayer.play();
-  else musicPlayer.pause();
+  if (state === 'active') {
+    void setIsAudioActiveAsync(true)
+      .catch(() => {})
+      .then(() => musicPlayer?.play());
+  } else {
+    musicPlayer.pause();
+  }
 });
 
 // A few lazily created players per effect, used in turn, so a sound can be
@@ -101,7 +135,11 @@ export async function playSfx(name: SfxName, volume = 1) {
   player.volume = volume;
   // A finished player stays at the end: rewind before playing again.
   // The seek must complete first, otherwise iOS plays from the end (silence).
-  await player.seekTo(0);
+  try {
+    await player.seekTo(0);
+  } catch {
+    // A failed rewind must not prevent the sound from playing.
+  }
   player.play();
 }
 
