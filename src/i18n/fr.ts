@@ -102,7 +102,6 @@ const fr = {
     },
   },
   awards: {
-    none: 'Aucune récompense cette fois',
     continue: 'Continuer',
     next: 'Suivant',
     plusViteQueSonOmbre: {

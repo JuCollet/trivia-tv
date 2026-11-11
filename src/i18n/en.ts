@@ -102,7 +102,6 @@ const en: Resources = {
     },
   },
   awards: {
-    none: 'No awards this time',
     continue: 'Continue',
     next: 'Next',
     plusViteQueSonOmbre: {
