@@ -6,7 +6,7 @@ import AppText from '@/components/AppText';
 import AvatarMedia, { type Delays } from '@/components/AvatarMedia';
 import FocusableButton, { ROUND_RING } from '@/components/FocusableButton';
 import LoadingScreen from '@/components/LoadingScreen';
-import Pop, { popOpacity, usePop } from '@/components/Pop';
+import Pop, { POP_STAGGER_MS, popOpacity, usePop } from '@/components/Pop';
 import Screen from '@/components/Screen';
 import SunRays from '@/components/SunRays';
 import type { SfxName } from '@/audio/sounds';
@@ -42,7 +42,6 @@ const RAYS_OPACITY = 0.13;
 
 // When a page opens, its elements pop in one after the other: title,
 // subtitle, avatar, points badge, name, then the next button.
-const POP_STAGGER_MS = 130;
 const POP_DELAY = {
   title: 0,
   subtitle: POP_STAGGER_MS,
