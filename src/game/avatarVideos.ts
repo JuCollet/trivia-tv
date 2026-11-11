@@ -9,6 +9,7 @@ export type AvatarEmotion = 'neutral' | 'happy' | 'sad';
 
 const VIDEOS: Record<string, Partial<Record<AvatarEmotion, VideoSource>>> = {
   a01: {
+    neutral: require('../../assets/videos/avatars/a01/neutral.mp4'),
     happy: require('../../assets/videos/avatars/a01/happy.mp4'),
     sad: require('../../assets/videos/avatars/a01/sad.mp4'),
   },
@@ -16,6 +17,59 @@ const VIDEOS: Record<string, Partial<Record<AvatarEmotion, VideoSource>>> = {
     neutral: require('../../assets/videos/avatars/a02/neutral.mp4'),
     happy: require('../../assets/videos/avatars/a02/happy.mp4'),
     sad: require('../../assets/videos/avatars/a02/sad.mp4'),
+  },
+  a03: {
+    neutral: require('../../assets/videos/avatars/a03/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a03/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a03/sad.mp4'),
+  },
+  a04: {
+    neutral: require('../../assets/videos/avatars/a04/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a04/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a04/sad.mp4'),
+  },
+  a05: {
+    neutral: require('../../assets/videos/avatars/a05/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a05/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a05/sad.mp4'),
+  },
+  a06: {
+    neutral: require('../../assets/videos/avatars/a06/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a06/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a06/sad.mp4'),
+  },
+  a07: {
+    neutral: require('../../assets/videos/avatars/a07/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a07/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a07/sad.mp4'),
+  },
+  a08: {
+    neutral: require('../../assets/videos/avatars/a08/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a08/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a08/sad.mp4'),
+  },
+  a09: {
+    neutral: require('../../assets/videos/avatars/a09/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a09/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a09/sad.mp4'),
+  },
+  a10: {
+    neutral: require('../../assets/videos/avatars/a10/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a10/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a10/sad.mp4'),
+  },
+  a11: {
+    neutral: require('../../assets/videos/avatars/a11/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a11/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a11/sad.mp4'),
+  },
+  a12: {
+    neutral: require('../../assets/videos/avatars/a12/neutral.mp4'),
+    happy: require('../../assets/videos/avatars/a12/happy.mp4'),
+    sad: require('../../assets/videos/avatars/a12/sad.mp4'),
+  },
+  a24: {
+    neutral: require('../../assets/videos/avatars/a24/neutral.mp4'),
   },
 };
 
