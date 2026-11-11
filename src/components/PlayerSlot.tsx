@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import AvatarMedia from './AvatarMedia';
+import Pop, { POP_STAGGER_MS } from './Pop';
 import { avatarSource } from '@/game/avatars';
 import { avatarVideo } from '@/game/avatarVideos';
 import { colors, fonts, s } from '@/theme';
@@ -20,7 +21,15 @@ export type LobbyPlayer = {
   connected: boolean;
 };
 
-type Props = { size: number } & ({ player: LobbyPlayer } | { player?: undefined; hint?: boolean });
+type Props = { size: number } & (
+  | {
+      player: LobbyPlayer;
+      // When the avatar pops in, the name following one stagger later;
+      // null when the seat is already on screen.
+      popDelay?: number | null;
+    }
+  | { player?: undefined; hint?: boolean }
+);
 
 // Lobby seat: a round avatar ringed in white, the player's name on a tilted
 // pill over its bottom edge, and a status badge (check once their themes are
@@ -47,14 +56,14 @@ export default function PlayerSlot(props: Props) {
     );
   }
 
-  const { player } = props;
+  const { player, popDelay = null } = props;
   const source = avatarSource(player.avatar);
   const video = avatarVideo(player.avatar, 'neutral');
   const badge = Math.round(size * 0.38);
   const status = !player.connected ? DISCONNECTED_BADGE : player.ready ? READY_BADGE : WAITING_BADGE;
   return (
     <View style={[styles.slot, { width: size }]}>
-      <View style={[styles.seat, circle]}>
+      <Pop delay={popDelay} style={[styles.seat, circle]}>
         <View style={[styles.face, { borderRadius: size / 2 }, !player.connected && styles.disconnected]}>
           {source || video ? (
             <AvatarMedia still={source} video={video} size="84%" />
@@ -68,12 +77,14 @@ export default function PlayerSlot(props: Props) {
           source={status}
           style={[styles.badge, { width: badge, height: badge }]}
         />
-      </View>
-      <View style={styles.pill}>
-        <AppText style={styles.name} numberOfLines={1}>
-          {player.name}
-        </AppText>
-      </View>
+      </Pop>
+      <Pop delay={popDelay === null ? null : popDelay + POP_STAGGER_MS} style={styles.pillPop}>
+        <View style={[styles.pill, styles.pillInPop]}>
+          <AppText style={styles.name} numberOfLines={1}>
+            {player.name}
+          </AppText>
+        </View>
+      </Pop>
     </View>
   );
 }
@@ -120,6 +131,16 @@ const styles = StyleSheet.create({
     borderRadius: s(12),
     backgroundColor: colors.text,
     transform: [{ rotate: '-3deg' }],
+  },
+  // The name pops on its own: the wrapper takes the pill's place in the
+  // slot, the pill keeps its tilt inside it.
+  pillPop: {
+    marginTop: -s(10),
+    maxWidth: '118%',
+  },
+  pillInPop: {
+    marginTop: 0,
+    maxWidth: '100%',
   },
   hintPill: {
     backgroundColor: colors.highlight,

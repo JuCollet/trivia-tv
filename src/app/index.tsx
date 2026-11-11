@@ -6,7 +6,7 @@ import { MUSIC } from '@/audio/sounds';
 import AppText from '@/components/AppText';
 import FocusableButton, { GO_RING } from '@/components/FocusableButton';
 import PlayerSlot, { type LobbyPlayer } from '@/components/PlayerSlot';
-import Pop, { POP_STAGGER_MS } from '@/components/Pop';
+import { POP_STAGGER_MS } from '@/components/Pop';
 import QrCode from '@/components/QrCode';
 import Screen from '@/components/Screen';
 import RulesCarousel from '@/components/RulesCarousel';
@@ -214,10 +214,11 @@ function Info({
 
 // Every seat of the room, two rows of round avatars: joined players first,
 // then free seats. Each player pops in once, the first time the grid shows
-// them: on opening, the seated players one after the other (same pop and
-// stagger as the awards); later, only whoever just joined. A player who is
-// already shown never pops again, even when a departure moves them to
-// another seat or row, or while their phone is disconnected.
+// them, the avatar first and its name just after: on opening, the seated
+// players one after the other (same pop and stagger as the awards); later,
+// only whoever just joined. A player who is already shown never pops again,
+// even when a departure moves them to another seat or row, or while their
+// phone is disconnected.
 function PlayerGrid({ players }: { players: LobbyPlayer[] }) {
   // Who just arrived, worked out when the seated players change (during the
   // render, so the new seats mount with it). Whoever left is forgotten: if
@@ -241,9 +242,7 @@ function PlayerGrid({ players }: { players: LobbyPlayer[] }) {
           {row.map((seat) => {
             const player = players[seat];
             return player ? (
-              <Pop key={player.id} delay={popDelay(player.id)}>
-                <PlayerSlot player={player} size={SEAT_SIZE} />
-              </Pop>
+              <PlayerSlot key={player.id} player={player} size={SEAT_SIZE} popDelay={popDelay(player.id)} />
             ) : (
               // The first free seat invites the next player to scan the code.
               <PlayerSlot key={seat} hint={seat === players.length} size={SEAT_SIZE} />
