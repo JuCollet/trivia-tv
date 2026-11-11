@@ -55,6 +55,8 @@ export const colors = {
   slotText: '#2A1458',
   slotPointer: '#FF4FCF',
   bulbOff: '#5A4A10',
+  // A negative score in the podium's ranking.
+  scoreNegative: '#FF8A8E',
 } as const;
 
 // Button faces, top to bottom: light at the top, the base color at 45%,
@@ -67,7 +69,17 @@ export const gradients = {
   primary: ['#FFD055', '#FFC93C', '#E6B536'],
   secondary: ['#3D46A0', '#232D93', '#1F2884'],
   outline: ['rgba(37, 46, 135, 0.6)', 'rgba(8, 18, 110, 0.6)', 'rgba(7, 16, 99, 0.6)'],
+  // Podium screen: the backdrop, dark at the top and lighter at the bottom.
+  podiumBackdrop: ['#050838', '#0A1062', '#1A2696'],
 } as const;
+
+// Podium steps by rank (gold, silver, bronze): a flat matte face shaded like the
+// buttons, and the darker ink of the rank and score written on it.
+export const podiumSteps = [
+  { face: ['#FFE07A', '#FFC93C', '#E9AE22'], ink: '#8C5E05' },
+  { face: ['#EEF1FB', '#CDD4EC', '#AEB8DA'], ink: '#4E5A86' },
+  { face: ['#F6BE8E', '#E8975A', '#CF7C41'], ink: '#7A3D16' },
+] as const;
 
 export const spacing = {
   xs: s(4),

@@ -1,11 +1,12 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Animated, StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
+import { useState } from 'react';
+import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '@/components/AppText';
 import AvatarMedia, { type Delays } from '@/components/AvatarMedia';
 import FocusableButton, { ROUND_RING } from '@/components/FocusableButton';
 import LoadingScreen from '@/components/LoadingScreen';
+import Pop, { popOpacity, usePop } from '@/components/Pop';
 import Screen from '@/components/Screen';
 import SunRays from '@/components/SunRays';
 import type { SfxName } from '@/audio/sounds';
@@ -129,43 +130,6 @@ type PageProps = {
   mood: Mood;
   points: number;
 };
-
-// Springs from 0 to 1 after `delay`, with a slight overshoot. Native driver,
-// so it stays smooth on TV.
-function usePop(delay: number) {
-  const [value] = useState(() => new Animated.Value(0));
-  useEffect(() => {
-    const animation = Animated.spring(value, {
-      toValue: 1,
-      delay,
-      friction: 6,
-      tension: 90,
-      useNativeDriver: true,
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [value, delay]);
-  return value;
-}
-
-const popOpacity = (value: Animated.Value) =>
-  value.interpolate({
-    inputRange: [0, 0.6],
-    outputRange: [0, 1],
-    extrapolate: 'clamp',
-  });
-
-// Fades in and grows from 0.6 to full size, overshooting a little.
-function Pop({ delay, style, children }: { delay: number; style?: ViewStyle; children: ReactNode }) {
-  const value = usePop(delay);
-  const scale = value.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.6, 1],
-  });
-  return (
-    <Animated.View style={[style, { opacity: popOpacity(value), transform: [{ scale }] }]}>{children}</Animated.View>
-  );
-}
 
 // One award. Each page remounts (keyed by index), so its entrance replays.
 function AwardPage({ title, subtitle, name, avatar, mood, points }: PageProps) {

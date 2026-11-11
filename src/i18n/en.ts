@@ -159,8 +159,9 @@ const en: Resources = {
     },
   },
   finale: {
-    podium: 'Podium',
-    points: '{{count}} pts',
+    winner: '{{name}} wins the game!',
+    ranking: 'Ranking',
+    pointsUnit: 'pts',
   },
 };
 
