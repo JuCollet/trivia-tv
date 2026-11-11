@@ -127,7 +127,7 @@ function Carousel({ onClose }: { onClose: () => void }) {
           </View>
           <FocusableButton
             label={isLast ? t('rules.close') : t('rules.next')}
-            icon={isLast ? 'checkmark' : 'arrow-forward'}
+            icon={isLast ? undefined : 'arrow-forward'}
             sound={isLast ? 'click' : 'option'}
             onPress={isLast ? onClose : () => go(1, false)}
             hasTVPreferredFocus
