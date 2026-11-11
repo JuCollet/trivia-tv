@@ -55,6 +55,8 @@ export const colors = {
   slotText: '#2A1458',
   slotPointer: '#FF4FCF',
   bulbOff: '#5A4A10',
+  // Under the right answer on the results screen.
+  rightAnswer: 'rgba(46, 204, 113, 0.16)',
   // A negative score in the podium's ranking.
   scoreNegative: '#FF8A8E',
 } as const;

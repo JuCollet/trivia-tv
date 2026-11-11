@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import FocusableButton, { ROUND_RING } from '@/components/FocusableButton';
 import LoadingScreen from '@/components/LoadingScreen';
 import Pop, { POP_STAGGER_MS, popOpacity, usePop } from '@/components/Pop';
 import Screen from '@/components/Screen';
+import Standings, { standingsDuration } from '@/components/Standings';
 import SunRays from '@/components/SunRays';
 import type { SfxName } from '@/audio/sounds';
 import { avatarSource } from '@/game/avatars';
@@ -57,38 +58,35 @@ const AWARD_VIDEO_DELAYS: Delays = {
   pause: [7000, 10000],
 };
 
-// TV screen 6: carousel of the round's awards, one award at a time.
-// Laid out explicitly: the award's title and subtitle centred in the band above
-// the avatar, the avatar (with its points badge) and the player's name below,
-// and a round "next" button in the bottom-right corner. No page count: the
-// screen just moves on from one award to the next.
+// TV screen 6: carousel of the round's awards, one award at a time, then the
+// ranking after the round. Each award is laid out explicitly: its title and
+// subtitle centred in the band above the avatar, the avatar (with its points
+// badge) and the player's name below, and a round "next" button in the
+// bottom-right corner. No page count: the screen just moves on from one page
+// to the next. A round without any award opens straight on the ranking.
 export default function TvAwards() {
   const { t } = useTranslation();
-  const { view, next: advance } = useGame();
+  const { view, next: advance, roundStartScores } = useGame();
   const insets = useSafeAreaInsets();
   // The server uses the same award ids as the TV.
   const awards = roundAwardsToShow((view?.roundEnd?.awards ?? []) as Award[]);
   const [index, setIndex] = useState(0);
   const award = awards[index];
-  const isLast = index >= awards.length - 1;
+  // The last page, after the awards, is the ranking.
+  const isLast = index >= awards.length;
   // `index` replays the sound when two awards in a row share it.
   useScreenSfx(award ? AWARD_SFX[award.id] : null, 1, index);
 
-  // Nobody won an award this round: skip the screen and move on right away.
-  // Asked once per round, so that a state push can't advance two phases.
-  const skippedRound = useRef<number | null>(null);
-  const roundNumber = view?.round?.number ?? -1;
-  const nothingToShow = !!view?.roundEnd && awards.length === 0;
-  useEffect(() => {
-    if (!nothingToShow || skippedRound.current === roundNumber) return;
-    skippedRound.current = roundNumber;
-    advance();
-  }, [nothingToShow, roundNumber, advance]);
-
-  // Also covers the empty case: nothing is drawn while the server moves on.
-  if (!view?.roundEnd || nothingToShow) return <LoadingScreen />;
+  if (!view?.roundEnd) return <LoadingScreen />;
 
   const next = () => (isLast ? advance() : setIndex((i) => i + 1));
+  const players = view.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    avatar: player.avatar,
+    score: player.score,
+    gain: roundStartScores ? player.score - (roundStartScores[player.id] ?? 0) : null,
+  }));
 
   return (
     <Screen style={styles.screen}>
@@ -104,16 +102,29 @@ export default function TvAwards() {
           },
         ]}
       >
-        <AwardPage
-          key={index}
-          title={t(`awards.${award.id}.label`)}
-          subtitle={t(`awards.${award.id}.subtitle`)}
-          name={playerName(view, award.playerId)}
-          avatar={view.players.find((p) => p.id === award.playerId)?.avatar}
-          mood={AWARD_MOOD[award.id]}
-          points={award.points}
-        />
-        <Pop key={index} delay={POP_DELAY.next} style={styles.next}>
+        {award ? (
+          <AwardPage
+            key={`award-${index}`}
+            title={t(`awards.${award.id}.label`)}
+            subtitle={t(`awards.${award.id}.subtitle`)}
+            name={playerName(view, award.playerId)}
+            avatar={view.players.find((p) => p.id === award.playerId)?.avatar}
+            mood={AWARD_MOOD[award.id]}
+            points={award.points}
+          />
+        ) : (
+          <Standings
+            key="standings"
+            title={t('standings.title')}
+            subtitle={t('standings.subtitle', {
+              theme: view.round?.theme ?? '',
+              number: view.round?.number ?? 0,
+              total: view.round?.total ?? 0,
+            })}
+            players={players}
+          />
+        )}
+        <Pop key={`next-${index}`} delay={award ? POP_DELAY.next : standingsDuration(players.length)} style={styles.next}>
           <FocusableButton
             variant="round"
             icon="arrow-forward"
