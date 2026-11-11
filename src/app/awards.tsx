@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -74,7 +74,19 @@ export default function TvAwards() {
   // `index` replays the sound when two awards in a row share it.
   useScreenSfx(award ? AWARD_SFX[award.id] : null, 1, index);
 
-  if (!view?.roundEnd) return <LoadingScreen />;
+  // Nobody won an award this round: skip the screen and move on right away.
+  // Asked once per round, so that a state push can't advance two phases.
+  const skippedRound = useRef<number | null>(null);
+  const roundNumber = view?.round?.number ?? -1;
+  const nothingToShow = !!view?.roundEnd && awards.length === 0;
+  useEffect(() => {
+    if (!nothingToShow || skippedRound.current === roundNumber) return;
+    skippedRound.current = roundNumber;
+    advance();
+  }, [nothingToShow, roundNumber, advance]);
+
+  // Also covers the empty case: nothing is drawn while the server moves on.
+  if (!view?.roundEnd || nothingToShow) return <LoadingScreen />;
 
   const next = () => (isLast ? advance() : setIndex((i) => i + 1));
 
@@ -92,21 +104,15 @@ export default function TvAwards() {
           },
         ]}
       >
-        {award ? (
-          <AwardPage
-            key={index}
-            title={t(`awards.${award.id}.label`)}
-            subtitle={t(`awards.${award.id}.subtitle`)}
-            name={playerName(view, award.playerId)}
-            avatar={view.players.find((p) => p.id === award.playerId)?.avatar}
-            mood={AWARD_MOOD[award.id]}
-            points={award.points}
-          />
-        ) : (
-          <View style={[styles.fill, styles.empty]}>
-            <AppText variant="display">{t('awards.none')}</AppText>
-          </View>
-        )}
+        <AwardPage
+          key={index}
+          title={t(`awards.${award.id}.label`)}
+          subtitle={t(`awards.${award.id}.subtitle`)}
+          name={playerName(view, award.playerId)}
+          avatar={view.players.find((p) => p.id === award.playerId)?.avatar}
+          mood={AWARD_MOOD[award.id]}
+          points={award.points}
+        />
         <Pop key={index} delay={POP_DELAY.next} style={styles.next}>
           <FocusableButton
             variant="round"
@@ -228,10 +234,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  empty: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   rays: {
     position: 'absolute',
